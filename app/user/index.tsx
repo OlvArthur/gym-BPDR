@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -12,6 +13,8 @@ export default function UserHome() {
     hour: "2-digit",
     minute: "2-digit",
   });
+
+  const router = useRouter();
 
   return (
     <View style={styles.container}>
@@ -38,7 +41,10 @@ export default function UserHome() {
           <Text style={styles.bigButtonText}>Scanner un code QR</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.smallButton}>
+        <TouchableOpacity 
+            style={styles.smallButton}
+            onPress={() => router.push("/user/ranking")}
+        >
           <Text style={styles.smallButtonText}>Classement</Text>
         </TouchableOpacity>
       </View>

@@ -1,17 +1,3 @@
-// import React from 'react';
-// import { SafeAreaView } from 'react-native-safe-area-context';
-// import AdminHomeScreen from '../../src/screens/AdminHomeScreen';
-
-// export default function Index() {
-//   return (
-//     <SafeAreaView style={{ flex: 1 }}>
-//       <AdminHomeScreen />
-//     </SafeAreaView>
-//   );
-// }
-
-
-// src/screens/AdminHomeScreen.tsx
 import { Entypo, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import React, { JSX } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
