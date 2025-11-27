@@ -6,6 +6,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 
@@ -68,9 +69,9 @@ export default function UserRanking() {
     <View style={styles.container}>
       {/* Top Row */}
       <View style={styles.topRow}>
-        <View style={styles.backButton} onTouchEnd={() => router.back()}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <Text style={styles.backButtonText}>Retour</Text>
-        </View>
+        </TouchableOpacity>
 
         <View style={styles.pageTitleBox}>
           <Text style={styles.pageTitle}>Classement du mois</Text>
