@@ -28,6 +28,9 @@ export default function UserHome() {
 
     alert("QR code scanné: " + value);
 
+    console.log("Scanned QR Code:", value);
+    // example: 122 - Arthur Pereira
+
     // 👉  Insert your logic here:
     // router.push(`/user/${value}`)
     // loadUserById(value)

@@ -32,7 +32,7 @@ export default function UserRanking() {
     [11, "Décembre"],
   ]);
 
-  const years = [2023, 2024, 2025, 2026];
+  const years = [2022, 2023, 2024, 2025, 2026, 2027];
 
   const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
   const [selectedYear, setSelectedYear] = useState<number>(currentYear);
