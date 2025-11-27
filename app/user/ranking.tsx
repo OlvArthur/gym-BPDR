@@ -1,10 +1,11 @@
+import { Picker } from "@react-native-picker/picker";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 
@@ -33,33 +34,31 @@ export default function UserRanking() {
 
   const years = [2023, 2024, 2025, 2026];
 
-  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
-  const [selectedYear, setSelectedYear] = useState(currentYear);
-
-  // Mocked ranking data for layout demo
-  // const ranking = [
-  //   { name: "Liberato Bonfim", time: "169 heures 17 minutes" },
-  //   { name: "Manuel Villegas", time: "15 heures 53 minutes" },
-  //   { name: "François Pichette", time: "0 heures 0 minutes" },
-  // ];
-
+  const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
+  const [selectedYear, setSelectedYear] = useState<number>(currentYear);
 
   const [ranking, setRanking] = useState<{ name: string; time: string }[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadRanking() {
-      setLoading(true);
+      setLoading(true)
 
-      const data = await getMonthlyRanking(selectedMonth, selectedYear)
+      try {
+        const data = await getMonthlyRanking(selectedMonth, selectedYear)
 
-      const formattedRanking = data.map((item) => ({
-        name: item.userName,
-        time: `${Math.floor(item.duration / 60)} heures ${item.duration % 60} minutes`,
-      }));
-      
-      setRanking(formattedRanking);
-      setLoading(false);
+        const formattedRanking = data.map((item) => ({
+          name: item.userName,
+          time: `${Math.floor(item.duration / 60)} heures ${item.duration % 60} minutes`,
+        }))
+
+        setRanking(formattedRanking)
+      } catch (err) {
+        console.error("Failed to load ranking:", err)
+        setRanking([])
+      } finally {
+        setLoading(false);
+      }
     }
 
     loadRanking();
@@ -69,12 +68,9 @@ export default function UserRanking() {
     <View style={styles.container}>
       {/* Top Row */}
       <View style={styles.topRow}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
+        <View style={styles.backButton} onTouchEnd={() => router.back()}>
           <Text style={styles.backButtonText}>Retour</Text>
-        </TouchableOpacity>
+        </View>
 
         <View style={styles.pageTitleBox}>
           <Text style={styles.pageTitle}>Classement du mois</Text>
@@ -83,13 +79,33 @@ export default function UserRanking() {
 
       {/* Month / Year Row */}
       <View style={styles.filterRow}>
-        <TouchableOpacity style={styles.dropdown}>
-          <Text style={styles.dropdownText}>{months.get(selectedMonth)}</Text>
-        </TouchableOpacity>
+        <View style={styles.dropdownWrapper}>
+          {/* Picker for Month */}
+          <Picker
+            selectedValue={selectedMonth}
+            onValueChange={(value: number) => setSelectedMonth(Number(value))}
+            mode="dropdown"
+            style={styles.picker}
+          >
+            {Array.from(months.entries()).map(([num, label]) => (
+              <Picker.Item key={num} label={label} value={num} />
+            ))}
+          </Picker>
+        </View>
 
-        <TouchableOpacity style={styles.dropdown}>
-          <Text style={styles.dropdownText}>{selectedYear}</Text>
-        </TouchableOpacity>
+        <View style={styles.dropdownWrapper}>
+          {/* Picker for Year */}
+          <Picker
+            selectedValue={selectedYear}
+            onValueChange={(value: number) => setSelectedYear(Number(value))}
+            mode="dropdown"
+            style={styles.picker}
+          >
+            {years.map((y) => (
+              <Picker.Item key={y} label={String(y)} value={y} />
+            ))}
+          </Picker>
+        </View>
       </View>
 
       {/* Ranking List */}
@@ -165,13 +181,29 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
 
-  dropdown: {
+  dropdownWrapper: {
     width: "47%",
     borderWidth: 2,
     borderColor: PRIMARY,
     paddingHorizontal: 10,
-    paddingVertical: 10,
+    paddingVertical: Platform.OS === "android" ? 0 : 10,
     borderRadius: 6,
+
+    ...(Platform.OS === "web" && {
+    outline: "none",
+  })
+  },
+
+ picker: {
+  ...(
+    Platform.OS === "web"
+      ? {
+          borderWidth: 0,
+          outline: "none",
+          backgroundColor: "transparent",
+        }
+      : {}
+  ),
   },
 
   dropdownText: {

@@ -25,8 +25,6 @@ export async function getYearlyRanking(year: number): Promise<{ userId: string; 
 }
 
 export async function getSessionRankingByPeriod(start: Date, end: Date): Promise<{ userId: string; userName: string; duration: number }[]> {
-  // const start = new Date(year, 0, 1, 0, 0, 0);
-  // const end = new Date(year + 1, 0, 1, 0, 0, 0); // first day of next year
 
   const sessionsQuery = query(
     collection(db, "sessions"),
