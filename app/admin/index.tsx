@@ -1,4 +1,5 @@
 import { Entypo, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import React, { JSX } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -26,14 +27,17 @@ export default function AdminHomeScreen() {
 
       <View style={styles.buttonContainer}>
         <AdminButton
+          onPress={() => router.push('/admin/sessions')}
           icon={<MaterialIcons name="access-time" size={24} color="white" />}
           title="Afficher les heures"
         />
         <AdminButton
+          onPress={() => router.push('/admin/users')}
           icon={<MaterialIcons name="person-add" size={24} color="white" />}
           title="Afficher les utilisateurs"
         />
         <AdminButton
+          onPress={() => router.push('/admin/ranking' as any)}
           icon={<MaterialCommunityIcons name="chart-bar" size={24} color="white" />}
           title="Classement"
         />
