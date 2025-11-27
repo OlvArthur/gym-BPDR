@@ -10,6 +10,24 @@ export async function getMonthlyRanking(month: number, year: number): Promise<{ 
   const start = new Date(year, month, 1, 0, 0, 0);
   const end = new Date(year, month + 1, 1, 0, 0, 0); // first day of next month
 
+  const sessionRankingByMonth = await getSessionRankingByPeriod(start, end);
+
+  return sessionRankingByMonth
+}
+
+export async function getYearlyRanking(year: number): Promise<{ userId: string; userName: string; duration: number }[]> {
+  const start = new Date(year, 0, 1, 0, 0, 0);
+  const end = new Date(year + 1, 0, 1, 0, 0, 0); // first day of next year
+
+  const sessionRankingByYear = await getSessionRankingByPeriod(start, end);
+
+  return sessionRankingByYear;
+}
+
+export async function getSessionRankingByPeriod(start: Date, end: Date): Promise<{ userId: string; userName: string; duration: number }[]> {
+  // const start = new Date(year, 0, 1, 0, 0, 0);
+  // const end = new Date(year + 1, 0, 1, 0, 0, 0); // first day of next year
+
   const sessionsQuery = query(
     collection(db, "sessions"),
     where("checkIn", ">=", start),
@@ -31,9 +49,9 @@ export async function getMonthlyRanking(month: number, year: number): Promise<{ 
   });
 
   const usersIdsArray = Array.from(userIds);
-  
+
   // If no users, return empty ranking
-  if (!usersIdsArray.length) return [];
+  if (!usersIdsArray.length) return []; 
 
   const usersQuery = query(
     collection(db, "users"),
@@ -43,11 +61,11 @@ export async function getMonthlyRanking(month: number, year: number): Promise<{ 
   const snapUsers = await getDocs(usersQuery);
 
   const userMap = new Map<string, string>();
+
   snapUsers.forEach((doc) => {
     const user = doc.data();
     userMap.set(doc.id, user.name);
-  });
-
+  })
 
   const sortedSessions = Array.from(totals.entries())
     .map(([userId, duration]) => ({
@@ -55,16 +73,14 @@ export async function getMonthlyRanking(month: number, year: number): Promise<{ 
       userName: userMap.get(String(userId)) || "Inconnu",
       duration: Number(duration),
     }))
-    .sort((a, b) => b.duration - a.duration);
+    .sort((a, b) => b.duration - a.duration)
 
     return sortedSessions
-}
 
 
-// USAGE EXAMPLE:
-// const ranking = await getMonthlyRanking(6, 2024);
-// console.log(ranking);
-
+  }
+  
+  
 // RETURN EXAMPLE
 // [
 //   { userId: "user1", name:"Jhon", duration: 320 },
