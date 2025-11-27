@@ -14,6 +14,29 @@ import {
 // FIELDS:
 // userId, checkIn, checkOut, duration, createdAt, importedAt, isDeleted, modifiedAt
 
+const MAX_IDLE_HOURS = 6
+
+interface Session {
+  id: string
+  userId: string 
+  checkIn: Date
+  checkOut: Date | null
+  duration: number | null
+  createdAt: Date
+  isDeleted: boolean
+  modifiedAt: Date | null
+}
+
+export async function handleQRScan(userId: string) {
+  const activeSession = await getActiveSession(userId)
+
+  if (activeSession) {
+    return await stopSession(activeSession)
+  }
+
+  return await startSession(userId)
+}
+
 export async function startSession(userId: string) {
   return await addDoc(collection(db, "sessions"), {
     userId,
@@ -27,43 +50,40 @@ export async function startSession(userId: string) {
   });
 }
 
-export async function stopSession(sessionId: string) {
-  const ref = doc(db, "sessions", sessionId);
+export async function stopSession(session: Session) {
+  const ref = doc(db, "sessions", session.id)
 
-  const end = new Date();
+  const sessionStart = session.checkIn as Date
+  const now = new Date()
 
-  // Fetch session to compute duration
-  const snap = await getDocs(
-    query(
-      collection(db, "sessions"),
-      where("__name__", "==", sessionId)
-    )
-  );
-
-  if (snap.empty) return;
-
-  const data = snap.docs[0].data() as any;
-  const start = data.startTime.toDate();
 
   const duration =
-    Math.round((end.getTime() - start.getTime()) / (60 * 1000)); // minutes
+    Math.round((now.getTime() - sessionStart.getTime()) / (60 * 1000)); // minutes
+
+  // If the session is longer than MAX_IDLE_HOURS, cap the duration to one hour 
+
+  let finalDuration = duration
+  if (duration > MAX_IDLE_HOURS * 60) {
+    finalDuration = 60
+  }
 
   await updateDoc(ref, {
-    checkOut: end,
-    duration,
-  });
+    checkOut: now,
+    duration: finalDuration,
+    modifiedAt: serverTimestamp(),
+  })
 }
 
-export async function getActiveSession(userId: string) {
+export async function getActiveSession(userId: string): Promise<Session | null> {
   const q = query(
     collection(db, "sessions"),
     where("userId", "==", userId),
     where("checkOut", "==", null)
-  );
+  )
 
-  const snap = await getDocs(q);
+  const snap = await getDocs(q)
 
-  if (snap.empty) return null;
+  if (snap.empty) return null
 
-  return { id: snap.docs[0].id, ...snap.docs[0].data() };
+  return { id: snap.docs[0].id, ...snap.docs[0].data() } as Session
 }
