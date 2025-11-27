@@ -8,6 +8,7 @@ import {
     query,
     serverTimestamp,
     setDoc,
+    Timestamp,
     updateDoc,
     where,
 } from "firebase/firestore";
@@ -15,7 +16,6 @@ import {
 export {
     addDoc,
     collection, doc, getDoc,
-    getDocs, orderBy, query, serverTimestamp, setDoc,
-    updateDoc, where
+    getDocs, orderBy, query, serverTimestamp, setDoc, Timestamp, updateDoc, where
 };
 

@@ -6,6 +6,7 @@ import {
   getDocs,
   query,
   serverTimestamp,
+  Timestamp,
   updateDoc,
   where,
 } from "./firestore";
@@ -19,12 +20,12 @@ const MAX_IDLE_HOURS = 6
 interface Session {
   id: string
   userId: string 
-  checkIn: Date
-  checkOut: Date | null
+  checkIn: Timestamp
+  checkOut: Timestamp | null
   duration: number | null
-  createdAt: Date
+  createdAt: Timestamp
   isDeleted: boolean
-  modifiedAt: Date | null
+  modifiedAt: Timestamp | null
 }
 
 export async function handleQRScan(userId: string) {
@@ -53,18 +54,20 @@ export async function startSession(userId: string) {
 export async function stopSession(session: Session) {
   const ref = doc(db, "sessions", session.id)
 
-  const sessionStart = session.checkIn as Date
+  const sessionStart = session.checkIn.toDate()
   const now = new Date()
 
 
   const duration =
     Math.round((now.getTime() - sessionStart.getTime()) / (60 * 1000)); // minutes
 
-  // If the session is longer than MAX_IDLE_HOURS, cap the duration to one hour 
+  // If the session is longer than MAX_IDLE_HOURS, cap the duration to one hour and start a new session
 
   let finalDuration = duration
   if (duration > MAX_IDLE_HOURS * 60) {
     finalDuration = 60
+
+    await startSession(session.userId)
   }
 
   await updateDoc(ref, {

@@ -1,7 +1,9 @@
-import QRScanner from "@/components/QRScanner";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Button, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
+import QRScanner from "@/components/QRScanner";
+import { handleQRScan } from '@/firebase/sessionService';
 
 export default function UserHome() {
   const now = new Date();
@@ -28,12 +30,10 @@ export default function UserHome() {
 
     alert("QR code scanné: " + value);
 
-    console.log("Scanned QR Code:", value);
-    // example: 122 - Arthur Pereira
+    const userId = value.split(" - ")[0];
 
-    // 👉  Insert your logic here:
-    // router.push(`/user/${value}`)
-    // loadUserById(value)
+    handleQRScan(userId)
+    // example: 122 - Arthur Pereira
   };
 
 
