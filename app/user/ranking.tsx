@@ -1,42 +1,69 @@
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
+
+import { getMonthlyRanking } from "../../firebase/rankingService";
 
 export default function UserRanking() {
   const router = useRouter();
 
-  const months = [
-    "Janvier",
-    "Février",
-    "Mars",
-    "Avril",
-    "Mai",
-    "Juin",
-    "Juillet",
-    "Août",
-    "Septembre",
-    "Octobre",
-    "Novembre",
-    "Décembre",
-  ];
+  const currentMonth = new Date().getMonth(); // 0-11
+  const currentYear = new Date().getFullYear();
+
+  const months = new Map<number, string>([
+    [0, "Janvier"],
+    [1, "Février"],
+    [2, "Mars"],
+    [3, "Avril"],
+    [4, "Mai"],
+    [5, "Juin"],
+    [6, "Juillet"],
+    [7, "Août"],
+    [8, "Septembre"],
+    [9, "Octobre"],
+    [10, "Novembre"],
+    [11, "Décembre"],
+  ]);
 
   const years = [2023, 2024, 2025, 2026];
 
-  const [selectedMonth, setSelectedMonth] = useState("Novembre");
-  const [selectedYear, setSelectedYear] = useState(2025);
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+  const [selectedYear, setSelectedYear] = useState(currentYear);
 
   // Mocked ranking data for layout demo
-  const ranking = [
-    { name: "Liberato Bonfim", time: "169 heures 17 minutes" },
-    { name: "Manuel Villegas", time: "15 heures 53 minutes" },
-    { name: "François Pichette", time: "0 heures 0 minutes" },
-  ];
+  // const ranking = [
+  //   { name: "Liberato Bonfim", time: "169 heures 17 minutes" },
+  //   { name: "Manuel Villegas", time: "15 heures 53 minutes" },
+  //   { name: "François Pichette", time: "0 heures 0 minutes" },
+  // ];
+
+
+  const [ranking, setRanking] = useState<{ name: string; time: string }[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadRanking() {
+      setLoading(true);
+
+      const data = await getMonthlyRanking(selectedMonth, selectedYear)
+
+      const formattedRanking = data.map((item) => ({
+        name: item.userName,
+        time: `${Math.floor(item.duration / 60)} heures ${item.duration % 60} minutes`,
+      }));
+      
+      setRanking(formattedRanking);
+      setLoading(false);
+    }
+
+    loadRanking();
+  }, [selectedMonth, selectedYear]);
 
   return (
     <View style={styles.container}>
@@ -57,7 +84,7 @@ export default function UserRanking() {
       {/* Month / Year Row */}
       <View style={styles.filterRow}>
         <TouchableOpacity style={styles.dropdown}>
-          <Text style={styles.dropdownText}>{selectedMonth}</Text>
+          <Text style={styles.dropdownText}>{months.get(selectedMonth)}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.dropdown}>
@@ -67,12 +94,18 @@ export default function UserRanking() {
 
       {/* Ranking List */}
       <ScrollView style={styles.listContainer}>
-        {ranking.map((item, index) => (
-          <View key={index} style={styles.card}>
-            <Text style={styles.name}>{item.name}</Text>
-            <Text style={styles.time}>{item.time}</Text>
-          </View>
-        ))}
+        {loading ? (
+          <Text>Chargement...</Text>
+        ) : ranking.length === 0 ? (
+          <Text>Aucun résultat pour ce mois.</Text>
+        ) : (
+          ranking.map((item, index) => (
+            <View key={index} style={styles.card}>
+              <Text style={styles.name}>{item.name}</Text>
+              <Text style={styles.time}>{item.time}</Text>
+            </View>
+          ))
+        )}
       </ScrollView>
 
       {/* Footer Version */}
