@@ -1,6 +1,7 @@
+import QRScanner from "@/components/QRScanner";
 import { useRouter } from "expo-router";
-import React from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useState } from "react";
+import { Button, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function UserHome() {
   const now = new Date();
@@ -14,14 +15,31 @@ export default function UserHome() {
     minute: "2-digit",
   });
 
-  const router = useRouter();
+  const router = useRouter()
+
+  const [scannerVisible, setScannerVisible] = useState(false)
+
+  const handleScanPress = () => {
+    setScannerVisible(true);
+  };
+
+  const handleScanResult = (value: string) => {
+    setScannerVisible(false);
+
+    alert("QR code scanné: " + value);
+
+    // 👉  Insert your logic here:
+    // router.push(`/user/${value}`)
+    // loadUserById(value)
+  };
+
 
   return (
     <View style={styles.container}>
       {/* Header Logo + Date */}
       <View style={styles.header}>
         <Image
-          source={require("../../assets/logo.png")} // Replace with your logo
+          source={require("@/assets/logo.png")} // Replace with your logo
           resizeMode="contain"
           style={styles.logo}
         />
@@ -37,7 +55,7 @@ export default function UserHome() {
 
       {/* Center Buttons */}
       <View style={styles.buttonArea}>
-        <TouchableOpacity style={styles.bigButton}>
+        <TouchableOpacity style={styles.bigButton} onPress={handleScanPress}>
           <Text style={styles.bigButtonText}>Scanner un code QR</Text>
         </TouchableOpacity>
 
@@ -51,6 +69,13 @@ export default function UserHome() {
 
       {/* Footer with Version */}
       <Text style={styles.version}>Version: 28</Text>
+
+      <Modal visible={scannerVisible} animationType="slide">
+        <View style={{ flex: 1 }}>
+          <QRScanner onScan={handleScanResult} />
+          <Button title="Fermer" onPress={() => setScannerVisible(false)} />
+        </View>
+      </Modal>
     </View>
   );
 }
