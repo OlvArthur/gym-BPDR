@@ -6,6 +6,15 @@ import {
   where,
 } from "./firestore";
 
+export async function getDailyRanking(date: Date): Promise<{ userId: string; userName: string; duration: number }[]> {
+  const start = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0)
+  const end = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0) // next day at midnight
+
+  const sessionRankingByDay = await getSessionRankingByPeriod(start, end)
+
+  return sessionRankingByDay
+}
+
 export async function getMonthlyRanking(month: number, year: number): Promise<{ userId: string; userName: string; duration: number }[]> {
   const start = new Date(year, month, 1, 0, 0, 0);
   const end = new Date(year, month + 1, 1, 0, 0, 0); // first day of next month
