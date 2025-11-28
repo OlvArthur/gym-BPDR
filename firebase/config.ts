@@ -1,4 +1,3 @@
-import { getAnalytics, logEvent } from 'firebase/analytics';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
@@ -17,9 +16,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig)
 // For more information on how to access Firebase,
 // see the Firebase documentation: https://firebase.google.com/docs/web/setup#access-firebase
-const analytics = getAnalytics(app)
-logEvent(analytics, 'firestore_error')
-logEvent(analytics, 'app_open')
 
 
 export const db = getFirestore(app)
