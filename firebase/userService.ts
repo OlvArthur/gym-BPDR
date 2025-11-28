@@ -5,9 +5,17 @@ import {
     query,
     where
 } from "./firestore";
+import { Session } from "./sessionService";
 
 
-export async function getUsers(): Promise<{ id: string; name: string; role: string }[]> {
+export type UserSession = Pick<Session, 'id' | 'checkIn' | 'checkOut' | 'duration'>;  
+export interface User {
+    id: string;
+    name: string;
+    role: string;
+}
+
+export async function getUsers(): Promise<User[]> {
     const usersCollection = collection(db, "users")
     const snapUsers = await getDocs(usersCollection)
 
@@ -20,7 +28,7 @@ export async function getUsers(): Promise<{ id: string; name: string; role: stri
     return users
 }
 
-export async function getUserById(userId: string): Promise<{ id: string; name: string; role: string } | null> {
+export async function getUserById(userId: string): Promise<User | null> {
     const userQuery = query(
         collection(db, "users"),
         where("__name__", "==", userId)
@@ -37,7 +45,7 @@ export async function getUserById(userId: string): Promise<{ id: string; name: s
     }
 }
 
-export async function getUserSessions(userId: string): Promise<{ checkIn: Date; checkOut: Date; duration: number }[]> {
+export async function getUserSessions(userId: string): Promise<UserSession[]> {
     const sessionsQuery = query(
         collection(db, "sessions"),
         where("userId", "==", userId)
@@ -46,8 +54,9 @@ export async function getUserSessions(userId: string): Promise<{ checkIn: Date; 
 
     const sessions = snapSessions.docs
         .map(doc => ({
-            checkIn: doc.data().checkIn.toDate(),
-            checkOut: doc.data().checkOut.toDate(),
+            id: doc.id,
+            checkIn: doc.data().checkIn,
+            checkOut: doc.data().checkOut,
             duration: doc.data().duration,
         }))
 

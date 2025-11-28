@@ -1,46 +1,60 @@
+import { getUsers } from "@/firebase/userService";
 import { Ionicons } from "@expo/vector-icons"; // expo vector icons
-import { router } from "expo-router";
-import React, { useState } from "react";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
-    FlatList,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  FlatList,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native";
 
-type User = { id: string; name: string; role: string };
+interface User { 
+  id: string
+  name: string
+  role: string
+} 
 
-export default function UsersPage({ navigation }: { navigation?: any }) {
-  const [search, setSearch] = useState<string>("");
+export default function UsersPage() {
+  const router = useRouter()
+  
+  const [search, setSearch] = useState<string>("")
+  const [users, setUsers] = useState<User[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
 
-  const users: User[] = [
-    { id: "91", name: "Arthur Oliveira", role: "admin" },
-    { id: "40", name: "Jean Dupont", role: "user" },
-    { id: "113", name: "Maria Santos", role: "user" },
-  ];
+
+  const fetchUsers = async () => {
+    setLoading(true)
+    try  {
+      const data = await getUsers()
+      setUsers(data)
+    } catch (err) {
+      console.error("Failed to fetch users:", err)
+      setUsers([])
+    } finally {
+      setLoading(false)
+
+    }
+  }
+  
+  useEffect(() => {
+    fetchUsers()
+  }, [])
+  
+
 
   const filtered = users.filter(
     (u) =>
       u.name.toLowerCase().includes(search.toLowerCase()) ||
       u.id.includes(search)
-  );
+  )
 
-  const onPressUser = (item: User) => {
-    if (navigation && navigation.navigate) {
-      navigation.navigate("UserDetails", { id: item.id });
-    } else {
-      // If you use Expo Router, you can replace this with router.push(`/admin/user/${item.id}`)
-      console.log("Open user", item.id);
-    }
-  };
 
   const renderItem = ({ item }: { item: User }) => (
-    <TouchableOpacity
+    <View
       style={styles.card}
-      onPress={() => onPressUser(item)}
-      activeOpacity={0.7}
     >
       <View style={styles.cardText}>
         <Text style={styles.infoLabel}>
@@ -58,11 +72,14 @@ export default function UsersPage({ navigation }: { navigation?: any }) {
         </Text>
       </View>
 
-      <View style={styles.arrowContainer}>
+      <TouchableOpacity
+        style={styles.arrowContainer}
+        onPress={() => router.push(`/admin/users/${item.id}` as any)}
+      >
         <Ionicons name="chevron-forward" size={32} color="#3B57A2" />
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    </View>
+  )
 
   return (
     <View style={styles.screen}>
@@ -75,7 +92,7 @@ export default function UsersPage({ navigation }: { navigation?: any }) {
         <Text style={styles.headerTitle}>Utilisateurs</Text>
 
         <View style={styles.headerButtons}>
-          <TouchableOpacity style={styles.iconButton} onPress={() => console.log("refresh")}>
+          <TouchableOpacity style={styles.iconButton} onPress={fetchUsers}>
             <Ionicons name="refresh" size={22} color="#fff" />
           </TouchableOpacity>
 
@@ -105,15 +122,21 @@ export default function UsersPage({ navigation }: { navigation?: any }) {
       </View>
 
       {/* List */}
+
+      {loading ? (
+        <Text style={{ padding: 16 }}>Chargement...</Text>
+      ) : filtered.length === 0 ? (
+        <Text style={{ padding: 16 }}>Aucun utilisateur trouvé.</Text>
+      ) : (
       <FlatList
         contentContainerStyle={styles.listContainer}
         data={filtered}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-      />
+      />)}
     </View>
-  );
+  )
 }
 
 const PRIMARY = "#3B57A2";

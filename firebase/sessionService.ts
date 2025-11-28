@@ -17,7 +17,7 @@ import {
 
 const MAX_IDLE_HOURS = 6
 
-interface Session {
+export interface Session {
   id: string
   userId: string 
   checkIn: Timestamp

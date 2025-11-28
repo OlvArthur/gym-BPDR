@@ -1,74 +1,271 @@
-// import { Card, CardContent } from "@/components/ui/card";
-// import { ArrowLeft } from "lucide-react";
-// import Link from "next/link";
+import { Ionicons } from "@expo/vector-icons";
+import { format } from 'date-fns';
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-// export default function SessionDetailPage() {
-//   // placeholder data
-//   const session = {
-//     id: 1,
-//     user: "Paul Mossmann",
-//     arrival: "28 août 2025 08:03",
-//     departure: "28 août 2025 09:15",
-//     duration: "72 minutes",
-//     punches: [
-//       { time: "08:03", type: "Arrivée" },
-//       { time: "09:15", type: "Départ" }
-//     ]
-//   };
 
-//   return (
-//     <div className="min-h-screen bg-gray-100 flex flex-col">
-//       {/* Header */}
-//       <div className="flex items-center bg-blue-600 text-white p-4 shadow">
-//         <Link href="/admin/sessions" className="mr-4">
-//           <ArrowLeft className="w-6 h-6" />
-//         </Link>
-//         <h1 className="text-xl font-semibold">Session #{session.id}</h1>
-//       </div>
+import { getUserById, getUserSessions, UserSession as Session, User } from "@/firebase/userService";
 
-//       {/* Content */}
-//       <div className="p-4 space-y-4">
-//         {/* User Info */}
-//         <Card className="border-blue-600">
-//           <CardContent className="p-4 space-y-2">
-//             <p className="text-sm text-gray-500">Utilisateur</p>
-//             <p className="text-lg font-semibold text-gray-800">{session.user}</p>
+const PRIMARY = "#3B57A2";
 
-//             <div className="grid grid-cols-2 gap-4 mt-4">
-//               <div>
-//                 <p className="text-sm text-gray-500">Arrivée</p>
-//                 <p className="font-medium">{session.arrival}</p>
-//               </div>
-//               <div>
-//                 <p className="text-sm text-gray-500">Départ</p>
-//                 <p className="font-medium">{session.departure}</p>
-//               </div>
-//             </div>
+export default function UserDetailsPage() {
+  const router = useRouter();
+  const { id } = useLocalSearchParams<{ id: string }>();
 
-//             <div className="mt-4">
-//               <p className="text-sm text-gray-500">Durée totale</p>
-//               <p className="text-lg font-bold">{session.duration}</p>
-//             </div>
-//           </CardContent>
-//         </Card>
+  const formatTimestamp = (timestamp: any) => new Intl.DateTimeFormat(
+      'en-US', {day: '2-digit', month: 'short',  year: 'numeric', hour: '2-digit', minute: '2-digit'}
+    )
+    .format(timestamp)
+    .toString()
+    
 
-//         {/* Timeline */}
-//         <Card className="border-blue-600">
-//           <CardContent className="p-4 space-y-4">
-//             <h2 className="text-lg font-semibold text-gray-800 mb-2">Timeline</h2>
+  const [user, setUser] = useState<User | null>(null);
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [loading, setLoading] = useState(true);
 
-//             <div className="relative border-l-2 border-blue-600 ml-3 space-y-6">
-//               {session.punches.map((p, index) => (
-//                 <div key={index} className="ml-4 relative">
-//                   <div className="absolute -left-4 top-1 bg-blue-600 w-3 h-3 rounded-full"></div>
-//                   <p className="text-sm font-semibold">{p.time}</p>
-//                   <p className="text-gray-600">{p.type}</p>
-//                 </div>
-//               ))}
-//             </div>
-//           </CardContent>
-//         </Card>
-//       </div>
-//     </div>
-//   );
-// }
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const userData = await getUserById(id);
+      const sessionData = await getUserSessions(id);
+      setUser(userData);
+      setSessions(sessionData);
+    } catch (err) {
+      console.error("Failed:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const renderSession = ({ item }: { item: Session }) => (
+    <View style={styles.sessionCard}>
+      <View style={styles.sessionColumn}>
+        <Text style={styles.sessionLabel}>Arrivée:</Text>
+        <Text style={styles.sessionValue}>{format(item.checkIn.toDate(), "d MMMM yyyy H:mm" )}</Text>
+      </View>
+
+      <View style={styles.sessionColumn}>
+        <Text style={styles.sessionLabel}>Départ:</Text>
+        <Text style={styles.sessionValue}>{item.checkOut ? format(item.checkOut.toDate(), "d MMMM yyyy H:mm" ) : "--"}</Text>
+      </View>
+
+      <View style={styles.sessionColumn}>
+        <Text style={styles.sessionLabel}>Durée:</Text>
+        <Text style={styles.sessionValueBold}>{item.duration}</Text>
+      </View>
+
+      <TouchableOpacity
+        style={styles.arrowContainer}
+        onPress={() => router.push(`/admin/sessions/${item.id}` as any)}
+      >
+        <Ionicons name="chevron-forward" size={28} color={PRIMARY} />
+      </TouchableOpacity>
+    </View>
+  );
+
+  return (
+    <View style={styles.screen}>
+      {/* HEADER */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={26} color="#fff" />
+        </TouchableOpacity>
+
+        <Text style={styles.headerTitle}>Utilisateurs</Text>
+
+        <View style={styles.headerButtons}>
+          <TouchableOpacity style={styles.headerIconButton}>
+            <Ionicons name="trash" size={23} color="#fff" />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.headerIconButton}>
+            <Ionicons name="pencil" size={23} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {loading ? (
+        <Text style={styles.loading}>Chargement...</Text>
+      ) : !user ? (
+        <Text style={styles.loading}>Aucun utilisateur trouvé.</Text>
+      ) : (
+        <>
+          {/* USER INFO */}
+          <View style={styles.infoBlock}>
+            
+            <Text style={styles.infoLabel}>Identifiant utilisateur</Text>
+
+            <View style={styles.userCircle}>
+              <Text style={styles.userCircleText}>{user.id}</Text>
+            </View>
+
+            <Text style={styles.nameText}>{user.name}</Text>
+            <Text style={styles.roleText}>Rôle: {user.role}</Text>
+          </View>
+
+          {/* LIST TITLE */}
+          <Text style={styles.sectionTitle}>Sessions</Text>
+
+          {/* SESSION LIST */}
+          <FlatList
+            contentContainerStyle={styles.listContainer}
+            data={sessions}
+            keyExtractor={(s) => s.id}
+            renderItem={renderSession}
+            ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+          />
+        </>
+      )}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: "#f5f6f8",
+  },
+
+  /* HEADER */
+  header: {
+    backgroundColor: PRIMARY,
+    paddingHorizontal: 16,
+    paddingTop: 52,
+    paddingBottom: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+
+  headerTitle: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "600",
+    marginLeft: -24,
+  },
+
+  headerButtons: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  headerIconButton: {
+    marginLeft: 12,
+    padding: 6,
+    borderRadius: 6,
+  },
+
+  loading: {
+    padding: 16,
+    fontSize: 16,
+  },
+
+  /* USER INFO BLOCK */
+  infoBlock: {
+    backgroundColor: "#fff",
+    paddingVertical: 24,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderColor: PRIMARY,
+  },
+
+  infoLabel: {
+    fontSize: 16,
+    color: "#333",
+    marginBottom: 10,
+    fontWeight: "600",
+  },
+
+  userCircle: {
+    borderWidth: 2,
+    borderColor: PRIMARY,
+    borderRadius: 60,
+    paddingVertical: 14,
+    paddingHorizontal: 22,
+    alignSelf: "flex-start",
+    marginBottom: 18,
+  },
+
+  userCircleText: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: PRIMARY,
+  },
+
+  nameText: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#222",
+    marginBottom: 6,
+  },
+
+  roleText: {
+    fontSize: 16,
+    color: "#444",
+    fontWeight: "500",
+  },
+
+  sectionTitle: {
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 8,
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#222",
+  },
+
+  /* SESSION CARD */
+  listContainer: {
+    paddingHorizontal: 16,
+    paddingBottom: 50,
+  },
+
+  sessionCard: {
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: PRIMARY,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  sessionColumn: {
+    flex: 1,
+  },
+
+  sessionLabel: {
+    color: "#333",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+
+  sessionValue: {
+    fontSize: 13,
+    color: "#444",
+    marginBottom: 6,
+  },
+
+  sessionValueBold: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#111",
+  },
+
+  arrowContainer: {
+    width: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
