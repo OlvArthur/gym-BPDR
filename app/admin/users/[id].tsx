@@ -96,11 +96,17 @@ export default function UserDetailsPage() {
         <>
           {/* USER INFO */}
           <View style={styles.infoBlock}>
-            
-            <Text style={styles.infoLabel}>Identifiant utilisateur</Text>
+            <View style={{ flex: 1, flexDirection: "row", alignItems: "baseline" }}>
+              <Text style={styles.infoLabel}>Identifiant utilisateur</Text>
+              <View style={styles.userCircle}>
+                <Text style={styles.userCircleText}>
+                  i
+                </Text>
+              </View>
+            </View>
 
-            <View style={styles.userCircle}>
-              <Text style={styles.userCircleText}>{user.id}</Text>
+            <View >
+              <Text style={styles.idText}>{user.id}</Text>
             </View>
 
             <Text style={styles.nameText}>{user.name}</Text>
@@ -174,7 +180,7 @@ const styles = StyleSheet.create({
   },
 
   infoLabel: {
-    fontSize: 16,
+    fontSize: 22,
     color: "#333",
     marginBottom: 10,
     fontWeight: "600",
@@ -184,16 +190,23 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: PRIMARY,
     borderRadius: 60,
-    paddingVertical: 14,
-    paddingHorizontal: 22,
-    alignSelf: "flex-start",
+    paddingVertical: 2,
+    paddingHorizontal: 10,
+    alignSelf: "center",
     marginBottom: 18,
+    marginLeft: 12,
   },
 
   userCircleText: {
-    fontSize: 22,
+    fontSize: 15,
     fontWeight: "700",
     color: PRIMARY,
+  },
+
+  idText: {
+    fontSize: 30,
+    color: "#555",
+    marginBottom: 12,
   },
 
   nameText: {
