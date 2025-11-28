@@ -19,13 +19,6 @@ export default function UserDetailsPage() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  const formatTimestamp = (timestamp: any) => new Intl.DateTimeFormat(
-      'en-US', {day: '2-digit', month: 'short',  year: 'numeric', hour: '2-digit', minute: '2-digit'}
-    )
-    .format(timestamp)
-    .toString()
-    
-
   const [user, setUser] = useState<User | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
