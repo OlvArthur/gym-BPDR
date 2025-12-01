@@ -16,14 +16,12 @@ export default function AdminSessions() {
   const [selectedDate, setSelectedDate] = useState("2025-10-10")
   const [search, setSearch] = useState("")
   const [sessions, setSessions] = useState<EnrichedSession[]>([])
-  const [loading, setLoading] = useState(true)
 
   const filtered = sessions.filter((s) =>
     s.userName.toLowerCase().includes(search.toLowerCase())
   )
 
   const loadSessions = async () => {
-    setLoading(true)
 
     try {
       const sessions = await getSessionsByDate(new Date(selectedDate))
@@ -32,8 +30,6 @@ export default function AdminSessions() {
     } catch (err) {
       console.error("Failed to load sessions:", err)
       setSessions([])
-    } finally {
-      setLoading(false)
     }
   }
 
