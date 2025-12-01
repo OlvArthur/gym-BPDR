@@ -6,7 +6,13 @@ import {
   where,
 } from "./firestore";
 
-export async function getDailyRanking(date: Date): Promise<{ userId: string; userName: string; duration: number }[]> {
+export interface RankingSession {
+  userId: string;
+  userName: string;
+  duration: number;
+}
+
+export async function getDailyRanking(date: Date): Promise<RankingSession[]> {
   const start = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0)
   const end = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0) // next day at midnight
 
@@ -15,7 +21,7 @@ export async function getDailyRanking(date: Date): Promise<{ userId: string; use
   return sessionRankingByDay
 }
 
-export async function getMonthlyRanking(month: number, year: number): Promise<{ userId: string; userName: string; duration: number }[]> {
+export async function getMonthlyRanking(month: number, year: number): Promise<RankingSession[]> {
   const start = new Date(year, month, 1, 0, 0, 0);
   const end = new Date(year, month + 1, 1, 0, 0, 0); // first day of next month
 
@@ -24,7 +30,7 @@ export async function getMonthlyRanking(month: number, year: number): Promise<{ 
   return sessionRankingByMonth
 }
 
-export async function getYearlyRanking(year: number): Promise<{ userId: string; userName: string; duration: number }[]> {
+export async function getYearlyRanking(year: number): Promise<RankingSession[]> {
   const start = new Date(year, 0, 1, 0, 0, 0);
   const end = new Date(year + 1, 0, 1, 0, 0, 0); // first day of next year
 
@@ -33,7 +39,7 @@ export async function getYearlyRanking(year: number): Promise<{ userId: string; 
   return sessionRankingByYear;
 }
 
-export async function getSessionRankingByPeriod(start: Date, end: Date): Promise<{ userId: string; userName: string; duration: number }[]> {
+async function getSessionRankingByPeriod(start: Date, end: Date): Promise<RankingSession[]> {
 
   const sessionsQuery = query(
     collection(db, "sessions"),
@@ -86,11 +92,4 @@ export async function getSessionRankingByPeriod(start: Date, end: Date): Promise
 
 
   }
-  
-  
-// RETURN EXAMPLE
-// [
-//   { userId: "user1", name:"Jhon", duration: 320 },
-//   { userId: "user2", name: "Doe", duration: 280 },
-//   ...
-// ]
+

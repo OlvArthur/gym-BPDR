@@ -11,10 +11,6 @@ import {
   where,
 } from "./firestore";
 
-// COLLECTION: "sessions"
-// FIELDS:
-// userId, checkIn, checkOut, duration, createdAt, importedAt, isDeleted, modifiedAt
-
 const MAX_IDLE_HOURS = 6
 
 export interface Session {
@@ -26,6 +22,10 @@ export interface Session {
   createdAt: Timestamp
   isDeleted: boolean
   modifiedAt: Timestamp | null
+}
+
+export interface EnrichedSession extends Session {
+  userName: string
 }
 
 export async function handleQRScan(userId: string) {
@@ -89,4 +89,55 @@ export async function getActiveSession(userId: string): Promise<Session | null> 
   if (snap.empty) return null
 
   return { id: snap.docs[0].id, ...snap.docs[0].data() } as Session
+}
+
+
+export async function getSessionsByDate(date: Date): Promise<EnrichedSession[]> {
+  const start = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0)
+  const end = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0) // next day at midnight
+  
+  const sessionsQuery = query(
+    collection(db, "sessions"),
+    where("checkIn", ">=", start),
+    where("checkIn", "<", end)
+  )
+  
+  const snapSessions = await getDocs(sessionsQuery);
+  
+  const sessions: EnrichedSession[] = []
+  const userIds = new Set<string>()
+
+  snapSessions.forEach((doc) => {
+    userIds.add(doc.data().userId)
+    sessions.push({ id: doc.id, ...doc.data() } as EnrichedSession)
+  })
+
+  const usersIdsArray = Array.from(userIds)
+
+  // If no users, return empty ranking
+  if (!usersIdsArray.length) return [] 
+
+  const usersQuery = query(
+    collection(db, "users"),
+    where("__name__", "in", usersIdsArray)
+  )
+
+  const snapUsers = await getDocs(usersQuery)
+
+  const userMap = new Map<string, string>()
+
+  snapUsers.forEach((doc) => {
+    const user = doc.data();
+    userMap.set(doc.id, user.name)
+  })
+
+  const enrichedSessions: EnrichedSession[] = sessions.map(session => {
+    const userName = userMap.get(session.userId) || "Utilisateur inconnu";
+    (session as EnrichedSession).userName = userName
+
+    return session as EnrichedSession
+  })
+
+  
+  return enrichedSessions
 }

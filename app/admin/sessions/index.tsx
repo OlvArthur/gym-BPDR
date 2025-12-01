@@ -1,26 +1,45 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons"
+import { format } from 'date-fns'
+import { useRouter } from "expo-router"
+import React, { useEffect, useState } from "react"
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
 
-const PRIMARY = "#3B57A2";
+import { EnrichedSession, getSessionsByDate } from '@/firebase/sessionService'
+import CalendarModal from "./CalendarModal"
+
+const PRIMARY = "#3B57A2"
 
 export default function AdminSessions() {
   const router = useRouter();
 
-  const [selectedDate, setSelectedDate] = useState("2025-01-01");
-  const [search, setSearch] = useState("");
-
-  // MOCKED data — replace with Firestore later
-  const sessions = [
-    { id: "1", user: "John Doe", start: "07:32", end: "09:14", duration: "1h 42m" },
-    { id: "2", user: "Mélissa Dupont", start: "10:18", end: "11:50", duration: "1h 32m" },
-    { id: "3", user: "Manuel Villegas", start: "12:00", end: "14:12", duration: "2h 12m" },
-  ];
+  const [showCalendar, setShowCalendar] = useState(false)
+  const [selectedDate, setSelectedDate] = useState("2025-10-10")
+  const [search, setSearch] = useState("")
+  const [sessions, setSessions] = useState<EnrichedSession[]>([])
+  const [loading, setLoading] = useState(true)
 
   const filtered = sessions.filter((s) =>
-    s.user.toLowerCase().includes(search.toLowerCase())
-  );
+    s.userName.toLowerCase().includes(search.toLowerCase())
+  )
+
+  const loadSessions = async () => {
+    setLoading(true)
+
+    try {
+      const sessions = await getSessionsByDate(new Date(selectedDate))
+
+      setSessions(sessions)
+    } catch (err) {
+      console.error("Failed to load sessions:", err)
+      setSessions([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadSessions()
+  }, [selectedDate])
 
   return (
     <View style={styles.container}>
@@ -69,27 +88,27 @@ export default function AdminSessions() {
           <Text style={styles.dateText}>{selectedDate}</Text>
         </View>
 
-        <TouchableOpacity style={styles.calendarBtn}>
+        <TouchableOpacity style={styles.calendarBtn} onPress={() => setShowCalendar(true)}>
           <Ionicons name="calendar" color="white" size={20} />
         </TouchableOpacity>
       </View>
 
       {/* SESSIONS LIST */}
       <ScrollView style={styles.list}>
-        {filtered.map((s) => (
+        {filtered.map((session, index) => (
           <View
-            key={s.id}
+            key={index}
             style={styles.card}
           >
             <View>
-              <Text style={styles.userName}>{s.user}</Text>
-              <Text style={styles.detail}>Arrivée : {s.start}</Text>
-              <Text style={styles.detail}>Départ : {s.end}</Text>
-              <Text style={styles.detail}>Minutes : {s.duration}</Text>
+              <Text style={styles.userName}>{session.userName}</Text>
+              <Text style={styles.detail}>Arrivée : {format(session.checkIn.toDate(), "d MMMM yyyy H:mm" )}</Text>
+              <Text style={styles.detail}>Départ : {session.checkOut ? format(session.checkOut?.toDate(), "d MMMM yyyy H:mm" ) : '--'}</Text>
+              <Text style={styles.detail}>Minutes : {session.duration}</Text>
             </View>
 
             <TouchableOpacity
-              onPress={() => router.push(`/admin/sessions/${s.id}` as any)}
+              onPress={() => router.push(`/admin/sessions/${session.id}` as any)}
               style={styles.arrowContainer}
             >
                 <Ionicons name="chevron-forward" size={32} color={PRIMARY} />
@@ -103,6 +122,14 @@ export default function AdminSessions() {
           </Text>
         )}
       </ScrollView>
+
+      {/* CALENDAR MODAL */}
+      <CalendarModal
+        visible={showCalendar}
+        onClose={() => setShowCalendar(false)}
+        onConfirm={(date) => setSelectedDate(format(date, "yyyy-MM-dd"))}
+      />
+
     </View>
   );
 }
