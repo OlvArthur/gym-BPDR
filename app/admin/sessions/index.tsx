@@ -13,7 +13,7 @@ export default function AdminSessions() {
   const router = useRouter();
 
   const [showCalendar, setShowCalendar] = useState(false)
-  const [selectedDate, setSelectedDate] = useState("2025-10-10")
+  const [selectedDate, setSelectedDate] = useState(new Date())
   const [search, setSearch] = useState("")
   const [sessions, setSessions] = useState<EnrichedSession[]>([])
 
@@ -22,9 +22,9 @@ export default function AdminSessions() {
   )
 
   const loadSessions = async () => {
-
     try {
-      const sessions = await getSessionsByDate(new Date(selectedDate))
+      const sessions = await getSessionsByDate(selectedDate)
+
 
       setSessions(sessions)
     } catch (err) {
@@ -50,7 +50,7 @@ export default function AdminSessions() {
 
         <View style={styles.headerIcons}>
           {/* REFRESH BUTTON */}
-          <TouchableOpacity style={{ marginRight: 18 }}>
+          <TouchableOpacity onPress={loadSessions} style={{ marginRight: 18 }}>
             <Ionicons name="refresh" size={26} color="white" />
           </TouchableOpacity>
 
@@ -81,7 +81,7 @@ export default function AdminSessions() {
       {/* DATE SELECTOR */}
       <View style={styles.dateRow}>
         <View style={styles.dateBox}>
-          <Text style={styles.dateText}>{selectedDate}</Text>
+          <Text style={styles.dateText}>{format(selectedDate, "yyyy-MM-dd")}</Text>
         </View>
 
         <TouchableOpacity style={styles.calendarBtn} onPress={() => setShowCalendar(true)}>
@@ -123,7 +123,7 @@ export default function AdminSessions() {
       <CalendarModal
         visible={showCalendar}
         onClose={() => setShowCalendar(false)}
-        onConfirm={(date) => setSelectedDate(format(date, "yyyy-MM-dd"))}
+        onConfirm={(date) => setSelectedDate(date)}
       />
 
     </View>

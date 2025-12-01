@@ -190,9 +190,6 @@ const styles = StyleSheet.create({
     paddingVertical: Platform.OS === "android" ? 0 : 10,
     borderRadius: 6,
 
-    ...(Platform.OS === "web" && {
-    outline: "none",
-  })
   },
 
  picker: {
@@ -200,7 +197,6 @@ const styles = StyleSheet.create({
     Platform.OS === "web"
       ? {
           borderWidth: 0,
-          outline: "none",
           backgroundColor: "transparent",
         }
       : {}

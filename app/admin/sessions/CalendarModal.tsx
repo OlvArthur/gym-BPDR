@@ -1,3 +1,4 @@
+import { format } from "date-fns"
 import React, { useState } from "react"
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { Calendar, LocaleConfig } from 'react-native-calendars'
@@ -59,7 +60,7 @@ LocaleConfig.defaultLocale = 'fr'
               setSelectedDate(date)
             }}
             markedDates={{
-              [selectedDate.toISOString().split('T')[0]]: { selected: true }
+              [format(new Date(), "yyyy-MM-dd")]: { selected: true }
             }}
           />
             {/* FOOTER BUTTONS */}
