@@ -33,10 +33,26 @@ LocaleConfig.defaultLocale = 'fr'
 
   const [selectedDate, setSelectedDate] = useState(new Date())
 
+  const formatHeader = (date: Date) => ({
+    weekDay: date.toLocaleDateString('fr-FR', { weekday: 'long' }),
+    month: date.toLocaleDateString('fr-FR', { month: 'long' }),
+    day: date.getDate(),
+    year: date.getFullYear(),
+  }) 
+
+  const header = formatHeader(selectedDate)
+
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
         <View style={styles.container}>
+          <View style={styles.header}>
+            <Text style={styles.headerWeekday}>{header.weekDay}</Text>
+            <Text style={styles.headerMonth}>{header.month}</Text>
+            <Text style={styles.headerDay}>{header.day}</Text>
+            <Text style={styles.headerYear}>{header.year}</Text>
+          </View>
+
           <Calendar
             onDayPress={(day) => {
               const date = new Date(day.year, day.month - 1, day.day)
@@ -103,69 +119,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     marginTop: 2,
-  },
-
-  /* MONTH SELECTOR */
-  monthRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    padding: 12,
-    alignItems: "center",
-  },
-  arrow: {
-    fontSize: 22,
-    color: "#1B70D9",
-    paddingHorizontal: 10,
-  },
-  monthLabel: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#1B70D9",
-  },
-
-  /* WEEKDAYS */
-  weekdays: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 15,
-    marginBottom: 4,
-  },
-  weekday: {
-    width: 32,
-    textAlign: "center",
-    color: "#666",
-    fontWeight: "600",
-  },
-
-  /* GRID */
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    paddingHorizontal: 15,
-  },
-  dayCell: {
-    width: "13%",
-    height: 38,
-    justifyContent: "center",
-    alignItems: "center",
-    marginVertical: 5,
-    borderRadius: 4,
-  },
-  dayEmpty: {
-    backgroundColor: "transparent",
-  },
-  daySelected: {
-    backgroundColor: "#1B70D9",
-    borderRadius: 4,
-  },
-  dayText: {
-    fontSize: 15,
-    color: "#333",
-  },
-  dayTextSelected: {
-    color: "#fff",
-    fontWeight: "700",
   },
 
   /* FOOTER */
