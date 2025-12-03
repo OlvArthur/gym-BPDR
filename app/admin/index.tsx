@@ -1,4 +1,4 @@
-import { Entypo, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { Entypo, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { JSX } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -46,6 +46,12 @@ export default function AdminHomeScreen() {
           title="Erreurs"
         />
       </View>
+
+      <TouchableOpacity
+        onPress={() => router.push(`/user` as any)}
+      >
+        <Ionicons name="chevron-forward" size={32} color="#3B57A2" />
+      </TouchableOpacity>
 
       <Text style={styles.version}>v: 2.3</Text>
     </View>

@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const PRIMARY = "#3B57A2";
 
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
 
   // Content
   content: {
-    paddingHorizontal: Platform.OS == 'web' ? 750 : 100,
+    paddingHorizontal: 200,
     paddingTop: 52,
   },
 

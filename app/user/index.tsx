@@ -4,6 +4,7 @@ import { Button, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from "
 
 import QRScanner from "@/components/QRScanner";
 import { handleQRScan } from '@/firebase/sessionService';
+import { Ionicons } from "@expo/vector-icons";
 
 export default function UserHome() {
   const now = new Date();
@@ -69,6 +70,12 @@ export default function UserHome() {
           <Text style={styles.smallButtonText}>Classement</Text>
         </TouchableOpacity>
       </View>
+
+      <TouchableOpacity
+        onPress={() => router.push(`/admin` as any)}
+      >
+        <Ionicons name="chevron-forward" size={32} color="#3B57A2" />
+      </TouchableOpacity>
 
       {/* Footer with Version */}
       <Text style={styles.version}>Version: 28</Text>

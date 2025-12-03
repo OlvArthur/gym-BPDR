@@ -1,15 +1,17 @@
-import { db } from "./config";
+import { chunkArray } from "@/hooks/chunkArray"
+import { db } from "./config"
 import {
   collection,
   getDocs,
   query,
   where,
-} from "./firestore";
+} from "./firestore"
 
 export interface RankingSession {
-  userId: string;
-  userName: string;
-  duration: number;
+  userId: string
+  userName: string
+  duration: number
+  formattedDuration: string
 }
 
 export async function getDailyRanking(date: Date): Promise<RankingSession[]> {
@@ -54,37 +56,56 @@ async function getSessionRankingByPeriod(start: Date, end: Date): Promise<Rankin
 
   snapSessions.forEach((doc) => {
     const session = doc.data();
-    if (!session.duration || !(session.checkOut)) return;
+    if (
+      !session.duration ||
+      !(session.checkOut) 
+      || Number(session.duration) > 60 * 6 // Exclude idle session from old app with more than 6 hours. Optimze by creating index on firestore 
+    ) return
 
-    userIds.add(session.userId);
+    if(session.userId) userIds.add(session.userId);
     
-    totals.set(session.userId, (Number(totals.get(session.userId)) || 0) + Number(session.duration));
-  });
+    totals.set(
+      session.userId,
+      (Number(totals.get(session.userId)) || 0) + Number(session.duration)
+    )
+  })
 
   const usersIdsArray = Array.from(userIds);
 
   // If no users, return empty ranking
   if (!usersIdsArray.length) return []; 
 
-  const usersQuery = query(
-    collection(db, "users"),
-    where("__name__", "in", usersIdsArray)
-  )
-
-  const snapUsers = await getDocs(usersQuery);
-
+  // Firestore has a maximum of 30 ids to query
+  
   const userMap = new Map<string, string>();
+  const userIdsbatches = chunkArray(usersIdsArray)
 
-  snapUsers.forEach((doc) => {
-    const user = doc.data();
-    userMap.set(doc.id, user.name);
-  })
+  for (const batch of userIdsbatches) {
+    const usersQuery = query(
+      collection(db, "users"),
+      where("__name__", "in", batch)
+    )
+
+    const snapUsers = await getDocs(usersQuery)
+
+    snapUsers.forEach((doc) => {
+      const user = doc.data();
+      userMap.set(doc.id, user.name);
+    })
+    
+  }
+
+
+
+
+
 
   const sortedSessions = Array.from(totals.entries())
     .map(([userId, duration]) => ({
       userId,
       userName: userMap.get(String(userId)) || "Inconnu",
       duration: Number(duration),
+      formattedDuration: `${Math.floor(Number(duration) / 60)} heures ${Number(duration) % 60} minutes`,
     }))
     .sort((a, b) => b.duration - a.duration)
 

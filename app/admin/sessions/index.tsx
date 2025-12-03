@@ -16,6 +16,7 @@ export default function AdminSessions() {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [search, setSearch] = useState("")
   const [sessions, setSessions] = useState<EnrichedSession[]>([])
+  const [loading, setLoading] = useState<Boolean>(false)
 
   const filtered = sessions.filter((s) =>
     s.userName.toLowerCase().includes(search.toLowerCase())
@@ -23,6 +24,7 @@ export default function AdminSessions() {
 
   const loadSessions = async () => {
     try {
+      setLoading(true)
       const sessions = await getSessionsByDate(selectedDate)
 
 
@@ -30,6 +32,8 @@ export default function AdminSessions() {
     } catch (err) {
       console.error("Failed to load sessions:", err)
       setSessions([])
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -91,9 +95,15 @@ export default function AdminSessions() {
 
       {/* SESSIONS LIST */}
       <ScrollView style={styles.list}>
-        {filtered.map((session, index) => (
+      {loading ? (
+        <Text style={styles.loadingText}>Chargement...</Text>
+      ) : !filtered.length ? (
+          <Text style={styles.loadingText}>
+            Aucun résultat.
+          </Text>
+      ) : filtered.map((session, idx) => (
           <View
-            key={index}
+            key={idx}
             style={styles.card}
           >
             <View>
@@ -111,12 +121,6 @@ export default function AdminSessions() {
             </TouchableOpacity>
           </View>
         ))}
-
-        {filtered.length === 0 && (
-          <Text style={{ marginTop: 20, textAlign: "center", color: "#666" }}>
-            Aucun résultat.
-          </Text>
-        )}
       </ScrollView>
 
       {/* CALENDAR MODAL */}
@@ -209,6 +213,12 @@ const styles = StyleSheet.create({
   },
 
   // LIST
+  loadingText: {
+    marginTop: 20,
+    textAlign: "center",
+    color: "#666"
+  },
+
   list: {
     flex: 1,
     marginTop: 10,

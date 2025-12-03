@@ -1,26 +1,39 @@
-import RankingDropdown from "@/components/RankingDropdown";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons"
+import { useRouter } from "expo-router"
+import React, { useEffect, useState } from "react"
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 
-const PRIMARY = "#3B57A2";
+import RankingDropdown from "@/components/RankingDropdown"
+import { getYearlyRanking, RankingSession } from "@/firebase/rankingService"
+
+const PRIMARY = "#3B57A2"
 
 export default function ClassementYear() {
-  const router = useRouter();
+  const router = useRouter()
 
-    const currentYear = new Date().getFullYear();
-  
-    const years = [2022, 2023, 2024, 2025, 2026, 2027];
-  
-    const [selectedYear, setSelectedYear] = useState<number>(currentYear);
+  const currentYear = new Date().getFullYear()
 
-  // MOCK DATA
-  const ranking = [
-    { id: 1, user: "John Doe", time: "12h 14m" },
-    { id: 2, user: "Mélissa Dupont", time: "10h 48m" },
-    { id: 3, user: "Manuel Villegas", time: "9h 22m" },
-  ];
+  const years = [2022, 2023, 2024, 2025, 2026, 2027]
+
+  const [selectedYear, setSelectedYear] = useState<number>(currentYear)
+  const [ranking, setRanking] = useState<RankingSession[]>([])
+  const [loading, setLoading] = useState<Boolean>(false)
+
+  const loadRanking = async () => {
+    try {
+      setLoading(true)
+      const data = await getYearlyRanking(selectedYear)
+      setRanking(data)
+    } catch(err) {
+      console.error("Failed to load yearly ranking:", err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadRanking()
+  }, [selectedYear])
 
   return (
     <View style={styles.screen}>
@@ -30,7 +43,7 @@ export default function ClassementYear() {
           <Ionicons name="arrow-back" size={26} color="#fff" />
         </TouchableOpacity>
 
-        <Text style={styles.headerTitle}>Classement - Mois</Text>
+        <Text style={styles.headerTitle}>Classement - Anné</Text>
 
         <View style={styles.headerRight} />
       </View>
@@ -48,10 +61,16 @@ export default function ClassementYear() {
 
       {/* LIST */}
       <ScrollView style={styles.list}>
-        {ranking.map((item) => (
-          <View key={item.id} style={styles.card}>
-            <Text style={styles.user}>{item.user}</Text>
-            <Text style={styles.time}>{item.time}</Text>
+        {loading ? (
+          <Text style={styles.loadingText}>Chargement...</Text>
+        ) : !ranking.length ? ( 
+            <Text style={styles.loadingText}>
+              Aucun résultat.
+            </Text>
+        ) : ranking.map((item, idx) => (
+          <View key={idx} style={styles.card}>
+            <Text style={styles.user}>{item.userName}</Text>
+            <Text style={styles.time}>{item.formattedDuration}</Text>
           </View>
         ))}
       </ScrollView>
@@ -109,6 +128,12 @@ const styles = StyleSheet.create({
   list: {
     marginTop: 20,
     marginHorizontal: 20,
+  },
+
+  loadingText: {
+    marginTop: 20,
+    textAlign: "center",
+    color: "#666"
   },
 
   card: {

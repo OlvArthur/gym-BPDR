@@ -23,13 +23,13 @@ export default function UsersPage() {
   const [search, setSearch] = useState<string>("")
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState<boolean>(true)
-
+  const [sortingOrder, setSortingOrder] = useState<boolean>(true)
 
   const fetchUsers = async () => {
     setLoading(true)
     try  {
       const data = await getUsers()
-      setUsers(data)
+      setUsers(data.sort((a,b) => Number(a.id) - Number(b.id)))
     } catch (err) {
       console.error("Failed to fetch users:", err)
       setUsers([])
@@ -45,7 +45,7 @@ export default function UsersPage() {
   
 
 
-  const filtered = users.filter(
+  let filtered = users.filter(
     (u) =>
       u.name.toLowerCase().includes(search.toLowerCase()) ||
       u.id.includes(search)
@@ -96,7 +96,7 @@ export default function UsersPage() {
             <Ionicons name="refresh" size={22} color="#fff" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.iconButton} onPress={() => console.log("sort")}>
+          <TouchableOpacity style={styles.iconButton} onPress={() => setSortingOrder(!sortingOrder)}>
             <Ionicons name="swap-vertical" size={22} color="#fff" />
           </TouchableOpacity>
 
@@ -130,10 +130,11 @@ export default function UsersPage() {
       ) : (
       <FlatList
         contentContainerStyle={styles.listContainer}
-        data={filtered}
+        data={sortingOrder ? filtered : filtered.reverse() }
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+        extraData={sortingOrder}
       />)}
     </View>
   )

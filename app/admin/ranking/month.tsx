@@ -1,8 +1,10 @@
-import RankingDropdown from "@/components/RankingDropdown";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
+import RankingDropdown from "@/components/RankingDropdown";
+import { getMonthlyRanking, RankingSession } from '@/firebase/rankingService';
 
 const PRIMARY = "#3B57A2";
 
@@ -27,17 +29,30 @@ export default function ClassementMonth() {
       [11, "Décembre"],
     ]);
   
-    const years = [2022, 2023, 2024, 2025, 2026, 2027];
+    const years = [2022, 2023, 2024, 2025, 2026, 2027]
   
-    const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
-    const [selectedYear, setSelectedYear] = useState<number>(currentYear);
+    const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth)
+    const [selectedYear, setSelectedYear] = useState<number>(currentYear)
+    const [ranking, setRanking] = useState<RankingSession[]>([])
+    const [loading, setLoading] = useState<boolean>(false)
 
-  // MOCK DATA
-  const ranking = [
-    { id: 1, user: "John Doe", time: "12h 14m" },
-    { id: 2, user: "Mélissa Dupont", time: "10h 48m" },
-    { id: 3, user: "Manuel Villegas", time: "9h 22m" },
-  ];
+    const loadRanking = async () => {
+      try {
+        setLoading(true)
+        const data = await getMonthlyRanking(selectedMonth, selectedYear)
+        setRanking(data)
+      } catch (err) {
+        console.error("Failed to load monthly ranking:", err);
+        setRanking([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    useEffect(() => {
+      loadRanking();
+    }, [selectedMonth, selectedYear])
+
 
   return (
     <View style={styles.screen}>
@@ -71,10 +86,16 @@ export default function ClassementMonth() {
 
       {/* LIST */}
       <ScrollView style={styles.list}>
-        {ranking.map((item) => (
-          <View key={item.id} style={styles.card}>
-            <Text style={styles.user}>{item.user}</Text>
-            <Text style={styles.time}>{item.time}</Text>
+        {loading ? (
+          <Text style={styles.loadingText}>Chargement...</Text>
+        ) : !ranking.length ? (
+          <Text style={styles.loadingText}>
+            Aucun résultat.
+          </Text>
+        ) : ranking.map((item, idx) => (
+          <View key={idx} style={styles.card}>
+            <Text style={styles.user}>{item.userName}</Text>
+            <Text style={styles.time}>{item.formattedDuration}</Text>
           </View>
         ))}
       </ScrollView>
@@ -125,6 +146,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     marginBottom: 15,
     marginTop: 25,
+  },
+
+  loadingText: {
+    marginTop: 20,
+    textAlign: "center",
+    color: "#666"
   },
 
 

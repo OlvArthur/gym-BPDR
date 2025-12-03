@@ -2,6 +2,7 @@ import { db } from "./config";
 import {
     collection,
     getDocs,
+    orderBy,
     query,
     where
 } from "./firestore";
@@ -46,19 +47,41 @@ export async function getUserById(userId: string): Promise<User | null> {
 }
 
 export async function getUserSessions(userId: string): Promise<UserSession[]> {
+    
+    // Index necessary firestore: userID (ascending) checkIn (descending) __name__(descending)
     const sessionsQuery = query(
         collection(db, "sessions"),
-        where("userId", "==", userId)
-    )
+        where("userId", "==", userId),
+        orderBy('checkIn', 'desc')
+    ) 
+
     const snapSessions = await getDocs(sessionsQuery)
 
-    const sessions = snapSessions.docs
-        .map(doc => ({
-            id: doc.id,
-            checkIn: doc.data().checkIn,
-            checkOut: doc.data().checkOut,
-            duration: doc.data().duration,
-        }))
+    // const sessions = snapSessions.docs
+    //     .map(doc => {
+    //         if(Number(doc.data().duration) > 60 * 6) return
+
+    //         return {
+    //           id: doc.id,
+            //   checkIn: doc.data().checkIn,
+            //   checkOut: doc.data().checkOut,
+            //   duration: doc.data().duration,
+    //         }
+    //     })
+
+    const sessions = snapSessions.docs.reduce((result, doc) => {
+        if(Number(doc.data()) < 60 * 6) {
+            result.push({
+              id: doc.id,
+              checkIn: doc.data().checkIn,
+              checkOut: doc.data().checkOut,
+              duration: doc.data().duration,
+            })
+        }
+
+        return result
+    }, [] as UserSession[])
+        
 
     return sessions
 }
