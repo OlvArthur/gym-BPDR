@@ -58,7 +58,7 @@ export async function getUserSessions(userId: string): Promise<UserSession[]> {
     const snapSessions = await getDocs(sessionsQuery)
 
     const sessions = snapSessions.docs.reduce((result, doc) => {
-        if(Number(doc.data()) < 60 * 6) {
+        if(Number(doc.data().duration) < 60 * 6) {
             result.push({
               id: doc.id,
               checkIn: doc.data().checkIn,

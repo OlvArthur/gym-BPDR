@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons"
 import { format } from 'date-fns'
+import { fr } from 'date-fns/locale'
 import { useLocalSearchParams, useRouter } from "expo-router"
 import React, { useEffect, useState } from "react"
 import {
@@ -45,12 +46,12 @@ export default function UserDetailsPage() {
     <View style={styles.sessionCard}>
       <View style={styles.sessionColumn}>
         <Text style={styles.sessionLabel}>Arrivée:</Text>
-        <Text style={styles.sessionValue}>{format(item.checkIn.toDate(), "d MMMM yyyy H:mm" )}</Text>
+        <Text style={styles.sessionValue}>{format(item.checkIn.toDate(), "d MMMM yyyy H:mm" , { locale: fr })}</Text>
       </View>
 
       <View style={styles.sessionColumn}>
         <Text style={styles.sessionLabel}>Départ:</Text>
-        <Text style={styles.sessionValue}>{item.checkOut ? format(item.checkOut.toDate(), "d MMMM yyyy H:mm" ) : "--"}</Text>
+        <Text style={styles.sessionValue}>{item.checkOut ? format(item.checkOut.toDate(), "d MMMM yyyy H:mm", { locale: fr } ) : "--"}</Text>
       </View>
 
       <View style={styles.sessionColumn}>

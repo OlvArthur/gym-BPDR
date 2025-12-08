@@ -3,10 +3,11 @@ import React, { useEffect, useRef, useState } from "react"
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { Calendar, LocaleConfig } from 'react-native-calendars'
 
-export default function CalendarModal({ visible, onClose, onConfirm }: {
+export default function CalendarModal({ visible, onClose, onConfirm, currentSelectedDate = new Date() }: {
     visible: boolean,
     onClose: () => void
     onConfirm: (date: Date) => void
+    currentSelectedDate: Date
 }) {
 
   const modalRef = useRef(null)
@@ -46,7 +47,7 @@ export default function CalendarModal({ visible, onClose, onConfirm }: {
 
 LocaleConfig.defaultLocale = 'fr'
 
-  const [selectedDate, setSelectedDate] = useState(new Date())
+  const [selectedDate, setSelectedDate] = useState(currentSelectedDate)
 
   const formatHeader = (date: Date) => ({
     weekDay: date.toLocaleDateString('fr-FR', { weekday: 'long' }),
@@ -73,15 +74,16 @@ LocaleConfig.defaultLocale = 'fr'
               const date = new Date(day.year, day.month - 1, day.day)
               setSelectedDate(date)
             }}
+            current={currentSelectedDate.toString()}
             markedDates={{
-              [format(new Date(), "yyyy-MM-dd")]: { selected: true }
+              [format(currentSelectedDate, "yyyy-MM-dd")]: { selected: true }
             }}
           />
             {/* FOOTER BUTTONS */}
             <View style={styles.footer}>
                 <TouchableOpacity onPress={() => {
-                    onConfirm(selectedDate)
-                    onClose()
+                  onClose()
+                  onConfirm(selectedDate)
                 }}>
                     <Text style={styles.okButton}>OK</Text>
                 </TouchableOpacity>

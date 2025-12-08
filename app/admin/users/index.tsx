@@ -124,9 +124,9 @@ export default function UsersPage() {
       {/* List */}
 
       {loading ? (
-        <Text style={{ padding: 16 }}>Chargement...</Text>
+        <Text style={styles.loadingText}>Chargement...</Text>
       ) : filtered.length === 0 ? (
-        <Text style={{ padding: 16 }}>Aucun utilisateur trouvé.</Text>
+        <Text style={styles.loadingText}>Aucun utilisateur trouvé.</Text>
       ) : (
       <FlatList
         contentContainerStyle={styles.listContainer}
@@ -202,6 +202,12 @@ const styles = StyleSheet.create({
   },
 
   // LIST / CARD
+  loadingText: {
+    marginTop: 20,
+    textAlign: "center",
+    color: "#666"
+  },
+
   listContainer: {
     paddingHorizontal: 16,
     paddingTop: 12,

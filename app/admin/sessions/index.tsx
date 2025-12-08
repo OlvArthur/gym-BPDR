@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons"
 import { format } from 'date-fns'
+import { fr } from 'date-fns/locale'
 import { useRouter } from "expo-router"
 import React, { useEffect, useState } from "react"
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
@@ -84,7 +85,7 @@ export default function AdminSessions() {
       {/* DATE SELECTOR */}
       <View style={styles.dateRow}>
         <TouchableOpacity style={styles.dateBox} onPress={() => setShowCalendar(true)}>
-          <Text style={styles.dateText}>{format(selectedDate, "yyyy-MM-dd")}</Text>
+          <Text style={styles.dateText}>{format(selectedDate, "d MMMM yyyy", { locale: fr })}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.calendarBtn} onPress={() => setShowCalendar(true)}>
@@ -107,8 +108,8 @@ export default function AdminSessions() {
           >
             <View>
               <Text style={styles.userName}>{session.userName}</Text>
-              <Text style={styles.detail}>Arrivée : {format(session.checkIn.toDate(), "d MMMM yyyy H:mm" )}</Text>
-              <Text style={styles.detail}>Départ : {session.checkOut ? format(session.checkOut?.toDate(), "d MMMM yyyy H:mm" ) : '--'}</Text>
+              <Text style={styles.detail}>Arrivée : {format(session.checkIn.toDate(), "d MMMM yyyy H:mm" ,  { locale: fr })}</Text>
+              <Text style={styles.detail}>Départ : {session.checkOut ? format(session.checkOut?.toDate(), "d MMMM yyyy H:mm",  { locale: fr }) : '--'}</Text>
               <Text style={styles.detail}>Minutes : {session.duration}</Text>
             </View>
 
@@ -127,6 +128,7 @@ export default function AdminSessions() {
         visible={showCalendar}
         onClose={() => setShowCalendar(false)}
         onConfirm={(date) => setSelectedDate(date)}
+        currentSelectedDate={selectedDate}
       />
 
     </View>
