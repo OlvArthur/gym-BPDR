@@ -1,15 +1,16 @@
 import { db } from "./config";
 import {
-  addDoc,
   collection,
   doc,
   getDocs,
   query,
   serverTimestamp,
+  setDoc,
   Timestamp,
   updateDoc,
-  where,
+  where
 } from "./firestore";
+import { getNextIncrementId } from "./hooks/getNextIncrementId";
 
 const MAX_IDLE_HOURS = 6
 
@@ -39,7 +40,9 @@ export async function handleQRScan(userId: string) {
 }
 
 export async function startSession(userId: string) {
-  return await addDoc(collection(db, "sessions"), {
+  const nextId = await getNextIncrementId("session")
+
+  await setDoc(doc(db, "sessions", String(nextId)), {
     userId,
     checkIn: serverTimestamp(),
     checkOut: null,
@@ -48,7 +51,7 @@ export async function startSession(userId: string) {
     importedAt: null,
     isDeleted: false,
     modifiedAt: null,
-  });
+  })
 }
 
 export async function stopSession(session: Session) {

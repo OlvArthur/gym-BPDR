@@ -2,20 +2,23 @@ import {
     addDoc,
     collection,
     doc,
+    documentId,
     getDoc,
     getDocs,
+    getFirestore,
+    limit,
     orderBy,
     query,
     serverTimestamp,
     setDoc,
     Timestamp,
     updateDoc,
-    where,
+    where
 } from "firebase/firestore";
 
 export {
     addDoc,
-    collection, doc, getDoc,
-    getDocs, orderBy, query, serverTimestamp, setDoc, Timestamp, updateDoc, where
+    collection, doc, documentId, getDoc,
+    getDocs, getFirestore, limit, orderBy, query, serverTimestamp, setDoc, Timestamp, updateDoc, where
 };
 
