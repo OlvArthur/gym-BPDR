@@ -10,7 +10,7 @@ import CalendarModal from "./CalendarModal"
 const PRIMARY = "#3B57A2"
 
 export default function AdminSessions() {
-  const router = useRouter();
+  const router = useRouter()
 
   const [showCalendar, setShowCalendar] = useState(false)
   const [selectedDate, setSelectedDate] = useState(new Date())
@@ -26,7 +26,6 @@ export default function AdminSessions() {
     try {
       setLoading(true)
       const sessions = await getSessionsByDate(selectedDate)
-
 
       setSessions(sessions)
     } catch (err) {
@@ -84,9 +83,9 @@ export default function AdminSessions() {
 
       {/* DATE SELECTOR */}
       <View style={styles.dateRow}>
-        <View style={styles.dateBox}>
+        <TouchableOpacity style={styles.dateBox} onPress={() => setShowCalendar(true)}>
           <Text style={styles.dateText}>{format(selectedDate, "yyyy-MM-dd")}</Text>
-        </View>
+        </TouchableOpacity>
 
         <TouchableOpacity style={styles.calendarBtn} onPress={() => setShowCalendar(true)}>
           <Ionicons name="calendar" color="white" size={20} />

@@ -1,45 +1,45 @@
-import { Ionicons } from "@expo/vector-icons";
-import { format } from 'date-fns';
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { Ionicons } from "@expo/vector-icons"
+import { format } from 'date-fns'
+import { useLocalSearchParams, useRouter } from "expo-router"
+import React, { useEffect, useState } from "react"
 import {
   FlatList,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-} from "react-native";
+} from "react-native"
 
 
-import { getUserById, getUserSessions, UserSession as Session, User } from "@/firebase/userService";
+import { getUserById, getUserSessions, UserSession as Session, User } from "@/firebase/userService"
 
-const PRIMARY = "#3B57A2";
+const PRIMARY = "#3B57A2"
 
 export default function UserDetailsPage() {
-  const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter()
+  const { id } = useLocalSearchParams<{ id: string }>()
 
-  const [user, setUser] = useState<User | null>(null);
-  const [sessions, setSessions] = useState<Session[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null)
+  const [sessions, setSessions] = useState<Session[]>([])
+  const [loading, setLoading] = useState(true)
 
   const loadData = async () => {
-    setLoading(true);
+    setLoading(true)
     try {
-      const userData = await getUserById(id);
-      const sessionData = await getUserSessions(id);
-      setUser(userData);
-      setSessions(sessionData);
+      const userData = await getUserById(id)
+      const sessionData = await getUserSessions(id)
+      setUser(userData)
+      setSessions(sessionData)
     } catch (err) {
-      console.error("Failed:", err);
+      console.error("Failed:", err)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   useEffect(() => {
-    loadData();
-  }, []);
+    loadData()
+  }, [])
 
   const renderSession = ({ item }: { item: Session }) => (
     <View style={styles.sessionCard}>
@@ -65,7 +65,7 @@ export default function UserDetailsPage() {
         <Ionicons name="chevron-forward" size={28} color={PRIMARY} />
       </TouchableOpacity>
     </View>
-  );
+  )
 
   return (
     <View style={styles.screen}>
@@ -127,7 +127,7 @@ export default function UserDetailsPage() {
         </>
       )}
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({

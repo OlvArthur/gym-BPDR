@@ -1,5 +1,5 @@
 import { format } from "date-fns"
-import React, { useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { Calendar, LocaleConfig } from 'react-native-calendars'
 
@@ -8,6 +8,20 @@ export default function CalendarModal({ visible, onClose, onConfirm }: {
     onClose: () => void
     onConfirm: (date: Date) => void
 }) {
+
+  const modalRef = useRef(null)
+  
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if(modalRef.current && !(modalRef.current as any).contains(e.target)) {
+        onClose()
+      }
+    }
+
+    if(visible) document.addEventListener("mousedown", handleClickOutside)
+
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [visible, onClose])
 
   LocaleConfig.locales['fr'] = {
     monthNames: [
@@ -46,7 +60,7 @@ LocaleConfig.defaultLocale = 'fr'
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
-        <View style={styles.container}>
+        <View ref={modalRef} style={styles.container}>
           <View style={styles.header}>
             <Text style={styles.headerWeekday}>{header.weekDay}</Text>
             <Text style={styles.headerMonth}>{header.month}</Text>
