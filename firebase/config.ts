@@ -23,7 +23,7 @@ const app = initializeApp(firebaseConfig)
 export const db = getFirestore(app)
 
 
-const auth = initializeAuth(app, {
+export const auth = initializeAuth(app, {
   persistence: Platform.OS ==='web' ? undefined : getReactNativePersistence(ReactNativeAsyncStorage)
 })
 signInAnonymously(auth).catch((error) => {

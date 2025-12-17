@@ -100,7 +100,7 @@ export default function UsersPage() {
             <Ionicons name="swap-vertical" size={22} color="#fff" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.iconButton} onPress={() => console.log("add")}>
+          <TouchableOpacity style={styles.iconButton} onPress={() => router.push('/admin/users/create')}>
             <Ionicons name="add" size={26} color="#fff" />
           </TouchableOpacity>
         </View>

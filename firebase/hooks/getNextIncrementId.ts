@@ -1,8 +1,9 @@
-import { collection, documentId, getDocs, limit, orderBy, query } from "../firestore";
+import { collection, documentId, getDocs, limit, orderBy, query } from "@firebase/firestore";
 
 import { db } from "../config";
 
 export async function getNextIncrementId(collectionName: string) {
+  // Index necessary firestore: __name__ (descending)
   const q = query(
     collection(db, collectionName),
     orderBy(documentId(), "desc"),
