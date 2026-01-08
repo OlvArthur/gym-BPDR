@@ -1,11 +1,11 @@
 import { db } from "./config";
 import {
+  addDoc,
   collection,
   doc,
   getDocs,
   query,
   serverTimestamp,
-  setDoc,
   Timestamp,
   updateDoc,
   where
@@ -42,7 +42,9 @@ export async function handleQRScan(userId: string) {
 export async function startSession(userId: string) {
   const nextId = await getNextIncrementId("session")
 
-  await setDoc(doc(db, "sessions", String(nextId)), {
+  // await setDoc(doc(db, "sessions", String(nextId)), {
+  return await addDoc(collection(db, "sessions"), {
+    fieldId: nextId,
     userId,
     checkIn: serverTimestamp(),
     checkOut: null,

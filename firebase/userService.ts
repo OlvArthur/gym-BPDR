@@ -1,7 +1,9 @@
 import { db } from "./config";
 import {
+    addDoc,
     collection,
     getDocs,
+    limit,
     orderBy,
     query,
     where
@@ -16,12 +18,25 @@ export interface User {
     role: string;
 }
 
+export async function createUser(name: string, role: string, fieldId: number) {
+    const userData = {
+        name,
+        role,
+        fieldId,
+        active: true,
+        createdAt: new Date(),
+        modifiedAt: null
+    }
+
+    await addDoc(collection(db,"users"), userData)
+}
+
 export async function getUsers(): Promise<User[]> {
     const usersCollection = collection(db, "users")
     const snapUsers = await getDocs(usersCollection)
 
     const users = snapUsers.docs.map((doc) => ({
-        id: doc.id,
+        id: doc.data().fieldId,
         name: doc.data().name,
         role: doc.data().role,
     }))
@@ -32,7 +47,8 @@ export async function getUsers(): Promise<User[]> {
 export async function getUserById(userId: string): Promise<User | null> {
     const userQuery = query(
         collection(db, "users"),
-        where("__name__", "==", userId)
+        where("fieldId", "==", Number(userId)),
+        limit(1)
     )
     const userDoc = (await getDocs(userQuery)).docs[0]
 
@@ -40,7 +56,7 @@ export async function getUserById(userId: string): Promise<User | null> {
     const userData = userDoc.data()
 
     return {
-        id: userDoc.id,
+        id: userData.fieldId,
         name: userData.name,
         role: userData.role,
     }

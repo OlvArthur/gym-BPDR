@@ -1,7 +1,7 @@
-import { getUsers } from "@/firebase/userService";
-import { Ionicons } from "@expo/vector-icons"; // expo vector icons
-import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { getUsers } from "@/firebase/userService"
+import { Ionicons } from "@expo/vector-icons"
+import { useRouter } from "expo-router"
+import React, { useEffect, useState } from "react"
 import {
   FlatList,
   StyleSheet,
@@ -9,7 +9,7 @@ import {
   TextInput,
   TouchableOpacity,
   View
-} from "react-native";
+} from "react-native"
 
 interface User { 
   id: string
@@ -85,7 +85,7 @@ export default function UsersPage() {
     <View style={styles.screen}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => router.push('/admin')}>
           <Ionicons name="arrow-back" size={26} color="#fff" />
         </TouchableOpacity>
 
@@ -140,7 +140,7 @@ export default function UsersPage() {
   )
 }
 
-const PRIMARY = "#3B57A2";
+const PRIMARY = "#3B57A2"
 
 const styles = StyleSheet.create({
   screen: {
@@ -249,4 +249,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-});
+})

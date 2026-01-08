@@ -1,61 +1,40 @@
-import { Ionicons } from "@expo/vector-icons";
-import { Directory, File } from "expo-file-system/next";
-import * as Sharing from "expo-sharing";
-import React, { useRef } from "react";
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import QRCode from "react-native-qrcode-svg";
+import { Ionicons } from "@expo/vector-icons"
+import React, { useRef } from "react"
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import QRCode from "react-native-qrcode-svg"
 
-const PRIMARY = "#3B57A2";
+const PRIMARY = "#3B57A2"
 
 interface User {
-    id: string
+    id: string | undefined
     name: string
     role: string
 }
 
-// Source - https://stackoverflow.com/a
-// Posted by tsu
-// Retrieved 2025-12-09, License - CC BY-SA 4.0
-
-type Base64<imageType extends string> = `data:image/${imageType};base64${string}`
-
 export default function UserQRCode({ user, visible }: { user: User, visible: boolean }) {
-  const qrRef = useRef<any>(null);
+  const qrRef = useRef<any>(null)
 
-  const qrPayload = JSON.stringify({
-    id: user.id,
-    name: user.name,
-    role: user.role,
-  });
+  const qrPayload = `${user.id} - ${user.name}`
 
   async function handleDownload() {
     try {
-      if (!qrRef.current) return;
+      qrRef.current?.toDataURL((base64: string) => {
+      // Ensure proper Data URL
+      const dataUrl = base64.startsWith("data:image")
+        ? base64
+        : `data:image/png;base64,${base64}`;
 
-      qrRef.current.toDataURL(async (base64: Base64<'png'>) => {
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = `qr-${user.id}.png`;
 
-        // Choose a safe directory for your file
-        const dir = (Directory as any).documentDirectory
-        const fileUri = dir.uri + `qr-${user.id}.png`
-
-        // Create a File object
-        const file = new File(fileUri)
-
-        // Write base64 PNG into the file
-        file.write(base64, {
-          encoding: "base64",
-        });
-
-        // Share or download
-        if (await Sharing.isAvailableAsync()) {
-          await Sharing.shareAsync(fileUri)
-        } else {
-          Alert.alert("QR Code généré", "Le partage n'est pas disponible.");
-        }
-      })
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    })
     } catch (err) {
       console.error("QR Download Error:", err)
-      Alert.alert("Erreur", "Impossible de générer ou télécharger le QR Code.");
+      Alert.alert("Erreur", "Impossible de générer ou télécharger le QR Code.")
     }
   }
 
@@ -69,7 +48,6 @@ export default function UserQRCode({ user, visible }: { user: User, visible: boo
             <QRCode
               value={qrPayload}
               size={180}
-              color={PRIMARY}
               backgroundColor="white"
               getRef={(ref) => (qrRef.current = ref)}
               />
@@ -81,7 +59,7 @@ export default function UserQRCode({ user, visible }: { user: User, visible: boo
           </TouchableOpacity> 
         </>
         ) : (
-        <Text>Rentrez le nom e rôle</Text>
+        <Text>Rentrez le nom et rôle et pressez le bouton pour générer le QR Code</Text>
         )}
     </View>
   )
