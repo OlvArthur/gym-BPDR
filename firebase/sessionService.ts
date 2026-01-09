@@ -110,10 +110,10 @@ export async function getSessionsByDate(date: Date): Promise<EnrichedSession[]> 
   const snapSessions = await getDocs(sessionsQuery);
   
   const sessions: EnrichedSession[] = []
-  const userIds = new Set<string>()
+  const userIds = new Set<number>()
 
   snapSessions.forEach((doc) => {
-    userIds.add(doc.data().userId)
+    userIds.add(Number(doc.data().userId))
     sessions.push({ id: doc.id, ...doc.data() } as EnrichedSession)
   })
 
@@ -124,20 +124,20 @@ export async function getSessionsByDate(date: Date): Promise<EnrichedSession[]> 
 
   const usersQuery = query(
     collection(db, "users"),
-    where("__name__", "in", usersIdsArray)
+    where("fieldId", "in", usersIdsArray)
   )
 
   const snapUsers = await getDocs(usersQuery)
 
-  const userMap = new Map<string, string>()
+  const userMap = new Map<number, string>()
 
   snapUsers.forEach((doc) => {
     const user = doc.data();
-    userMap.set(doc.id, user.name)
+    userMap.set(doc.data().fieldId, user.name)
   })
 
   const enrichedSessions: EnrichedSession[] = sessions.map(session => {
-    const userName = userMap.get(session.userId) || "Utilisateur inconnu";
+    const userName = userMap.get(Number(session.userId)) || "Utilisateur inconnu";
     (session as EnrichedSession).userName = userName
 
     return session as EnrichedSession

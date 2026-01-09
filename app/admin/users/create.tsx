@@ -25,7 +25,6 @@ export default function CreateUserScreen() {
   }, [])
 
   const handleSave = async () => {
-    console.log("Saving:", { name, role })
     await createUser(name, role, Number(nextIncrementId))
     router.push("/admin/users")
   }

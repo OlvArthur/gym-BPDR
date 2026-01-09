@@ -8,7 +8,7 @@ import {
 } from "./firestore"
 
 export interface RankingSession {
-  userId: string
+  userId: number
   userName: string
   duration: number
   formattedDuration: string
@@ -51,46 +51,46 @@ async function getSessionRankingByPeriod(start: Date, end: Date): Promise<Rankin
 
   const snapSessions = await getDocs(sessionsQuery);
 
-  const totals = new Map<string, number>();
-  const userIds = new Set<string>();
+  const totals = new Map<number, number>();
+  const userIds = new Set<number>();
 
   snapSessions.forEach((doc) => {
     const session = doc.data();
     if (
       !session.duration ||
       !(session.checkOut) 
-      || Number(session.duration) > 60 * 6 // Exclude idle session from old app with more than 6 hours. Optimze by creating index on firestore 
+      || Number(session.duration) > 60 * 6 // Exclude idle session from old app with more than 6 hours. 
     ) return
 
-    if(session.userId) userIds.add(session.userId);
+    if(session.userId) userIds.add(Number(session.userId))
     
     totals.set(
       session.userId,
-      (Number(totals.get(session.userId)) || 0) + Number(session.duration)
+      (Number(totals.get(Number(session.userId))) || 0) + Number(session.duration)
     )
   })
 
-  const usersIdsArray = Array.from(userIds);
+  const usersIdsArray = Array.from(userIds)
 
   // If no users, return empty ranking
   if (!usersIdsArray.length) return []; 
 
   // Firestore has a maximum of 30 ids to query
   
-  const userMap = new Map<string, string>();
+  const userMap = new Map<number, string>();
   const userIdsbatches = chunkArray(usersIdsArray)
 
   for (const batch of userIdsbatches) {
     const usersQuery = query(
       collection(db, "users"),
-      where("__name__", "in", batch)
+      where("fieldId", "in", batch)
     )
 
     const snapUsers = await getDocs(usersQuery)
 
     snapUsers.forEach((doc) => {
       const user = doc.data();
-      userMap.set(doc.id, user.name);
+      userMap.set(doc.data().fieldId, user.name);
     })
     
   }
@@ -103,14 +103,12 @@ async function getSessionRankingByPeriod(start: Date, end: Date): Promise<Rankin
   const sortedSessions = Array.from(totals.entries())
     .map(([userId, duration]) => ({
       userId,
-      userName: userMap.get(String(userId)) || "Inconnu",
+      userName: userMap.get(Number((userId))) || "Inconnu",
       duration: Number(duration),
       formattedDuration: `${Math.floor(Number(duration) / 60)} heures ${Number(duration) % 60} minutes`,
     }))
     .sort((a, b) => b.duration - a.duration)
 
     return sortedSessions
-
-
   }
 
