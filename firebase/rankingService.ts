@@ -47,9 +47,9 @@ async function getSessionRankingByPeriod(start: Date, end: Date): Promise<Rankin
     collection(db, "sessions"),
     where("checkIn", ">=", start),
     where("checkIn", "<", end)
-  );
+  )
 
-  const snapSessions = await getDocs(sessionsQuery);
+  const snapSessions = await getDocs(sessionsQuery)
 
   const totals = new Map<number, number>();
   const userIds = new Set<number>();
@@ -95,11 +95,6 @@ async function getSessionRankingByPeriod(start: Date, end: Date): Promise<Rankin
     
   }
 
-
-
-
-
-
   const sortedSessions = Array.from(totals.entries())
     .map(([userId, duration]) => ({
       userId,
@@ -108,6 +103,8 @@ async function getSessionRankingByPeriod(start: Date, end: Date): Promise<Rankin
       formattedDuration: `${Math.floor(Number(duration) / 60)} heures ${Number(duration) % 60} minutes`,
     }))
     .sort((a, b) => b.duration - a.duration)
+
+    snapSessions.docs.length = 0
 
     return sortedSessions
   }

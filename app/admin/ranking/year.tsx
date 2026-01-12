@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
 import React, { useEffect, useState } from "react"
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 
 import RankingDropdown from "@/components/RankingDropdown"
 import { getYearlyRanking, RankingSession } from "@/firebase/rankingService"
@@ -60,20 +60,25 @@ export default function ClassementYear() {
       
 
       {/* LIST */}
-      <ScrollView style={styles.list}>
-        {loading ? (
-          <Text style={styles.loadingText}>Chargement...</Text>
-        ) : !ranking.length ? ( 
-            <Text style={styles.loadingText}>
-              Aucun résultat.
-            </Text>
-        ) : ranking.map((item, idx) => (
-          <View key={idx} style={styles.card}>
+      {loading ? (
+        <Text style={styles.loadingText}>Chargement...</Text>
+      ) : !ranking.length ? (
+          <Text style={styles.loadingText}>
+            Aucun résultat.
+          </Text>
+      ) : (
+      <FlatList
+        style={styles.list}
+        data={ranking}
+        keyExtractor={(_, index) => index.toString()}
+        renderItem={({ item, index }) => (
+          <View key={index} style={styles.card}>
             <Text style={styles.user}>{item.userName}</Text>
             <Text style={styles.time}>{item.formattedDuration}</Text>
           </View>
-        ))}
-      </ScrollView>
+        )}
+      />
+      )}
     </View>
   );
 }

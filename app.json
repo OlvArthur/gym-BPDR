@@ -39,6 +39,9 @@
       "url": "https://u.expo.dev/5e326c7a-4640-414b-85a3-1f00c7349038",
       "fallbackToCacheTimeout": 0,
       "checkAutomatically": "ON_LOAD"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
     }
   }
 }
