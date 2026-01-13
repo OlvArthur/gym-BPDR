@@ -58,15 +58,17 @@ async function getSessionRankingByPeriod(start: Date, end: Date): Promise<Rankin
     const session = doc.data();
     if (
       !session.duration ||
-      !(session.checkOut) 
-      || Number(session.duration) > 60 * 6 // Exclude idle session from old app with more than 6 hours. 
+      !session.checkOut ||
+      Number(session.duration) > 60 * 6 // Exclude idle session from old app with more than 6 hours. 
     ) return
 
-    if(session.userId) userIds.add(Number(session.userId))
+    const sessionUserId = Number(session.userId)
+
+    if(session.userId) userIds.add(sessionUserId)
     
     totals.set(
-      session.userId,
-      (Number(totals.get(Number(session.userId))) || 0) + Number(session.duration)
+      sessionUserId,
+      (Number(totals.get(sessionUserId)) || 0) + Number(session.duration)
     )
   })
 
