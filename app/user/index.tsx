@@ -1,41 +1,46 @@
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
-import { Button, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { setVisibilityAsync } from 'expo-navigation-bar'
+import { useRouter } from "expo-router"
+import React, { useEffect, useState } from "react"
+import { Button, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 
-import QRScanner from "@/components/QRScanner";
-import { handleQRScan } from '@/firebase/sessionService';
-import { Ionicons } from "@expo/vector-icons";
+import QRScanner from "@/components/QRScanner"
+import { handleQRScan } from '@/firebase/sessionService'
+import { Ionicons } from "@expo/vector-icons"
 
 export default function UserHome() {
-  const now = new Date();
+  const now = new Date()
   const formattedDate = now.toLocaleDateString("fr-CA", {
     day: "numeric",
     month: "long",
     year: "numeric",
-  });
+  })
   const formattedTime = now.toLocaleTimeString("fr-CA", {
     hour: "2-digit",
     minute: "2-digit",
-  });
+  })
 
   const router = useRouter()
 
   const [scannerVisible, setScannerVisible] = useState(false)
 
   const handleScanPress = () => {
-    setScannerVisible(true);
-  };
+    setScannerVisible(true)
+  }
 
   const handleScanResult = (value: string) => {
-    setScannerVisible(false);
+    setScannerVisible(false)
 
-    alert("QR code scanné: " + value);
+    alert("QR code scanné: " + value)
 
-    const userId = value.split(" - ")[0];
+    const userId = value.split(" - ")[0]
 
     handleQRScan(userId)
     // example: 122 - Arthur Pereira
-  };
+  }
+
+  useEffect(() => {
+    setVisibilityAsync('hidden')
+  }, [])
 
 
   return (
@@ -87,7 +92,7 @@ export default function UserHome() {
         </View>
       </Modal>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -172,4 +177,4 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textAlign: "left",
   },
-});
+})
