@@ -12,7 +12,8 @@ import {
 } from "react-native"
 
 
-import { getUserById, getUserSessions, UserSession as Session, User } from "@/firebase/userService"
+import ConfirmModal from "@/components/ConfirmModal"
+import { deleteUserById as deleteUser, getUserById, getUserSessions, UserSession as Session, User } from "@/firebase/userService"
 
 const PRIMARY = "#3B57A2"
 
@@ -23,6 +24,7 @@ export default function UserDetailsPage() {
   const [user, setUser] = useState<User | null>(null)
   const [sessions, setSessions] = useState<Session[]>([])
   const [loading, setLoading] = useState(true)
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false)
 
   const loadData = async () => {
     setLoading(true)
@@ -79,7 +81,7 @@ export default function UserDetailsPage() {
         <Text style={styles.headerTitle}>Utilisateurs</Text>
 
         <View style={styles.headerButtons}>
-          <TouchableOpacity style={styles.headerIconButton}>
+          <TouchableOpacity onPress={() => setShowConfirmDelete(true)} style={styles.headerIconButton}>
             <Ionicons name="trash" size={23} color="#fff" />
           </TouchableOpacity>
 
@@ -127,6 +129,22 @@ export default function UserDetailsPage() {
           />
         </>
       )}
+
+      <ConfirmModal
+        visible={showConfirmDelete}
+        title="Supprimer l'utilisateur"
+        message="Cette action est définitive. Voulez-vous continuer ?"
+        confirmText="Supprimer"
+        cancelText="Annuler"
+        danger
+        onCancel={() => setShowConfirmDelete(false)}
+        onConfirm={async () => {
+          setShowConfirmDelete(false)
+          await deleteUser(Number(user!.id))
+          router.push("/admin/users")
+        }}
+      />
+
     </View>
   )
 }

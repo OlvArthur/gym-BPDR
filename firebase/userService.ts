@@ -1,24 +1,25 @@
-import { db } from "./config";
+import { db } from "./config"
 import {
     addDoc,
     collection,
+    deleteDoc,
     getDocs,
     limit,
     orderBy,
     query,
     where
-} from "./firestore";
-import { Session } from "./sessionService";
+} from "./firestore"
+import { Session } from "./sessionService"
 
 
-export type UserSession = Pick<Session, 'id' | 'checkIn' | 'checkOut' | 'duration'>;  
+export type UserSession = Pick<Session, 'id' | 'checkIn' | 'checkOut' | 'duration'>  
 export interface User {
-    id: string;
-    name: string;
-    role: string;
+    id: string
+    name: string
+    role: string
 }
 
-export async function createUser(name: string, role: string, fieldId: number) {
+export async function createUser(name: string, role: string, fieldId: number): Promise<void> {
     const userData = {
         name,
         role,
@@ -29,6 +30,19 @@ export async function createUser(name: string, role: string, fieldId: number) {
     }
 
     await addDoc(collection(db,"users"), userData)
+}
+
+export async function deleteUserById(userId: number): Promise<void> {
+    const userQuery = query(
+        collection(db, "users"),
+        where("fieldId", "==", userId),
+        limit(1)
+    )
+    const userDoc = (await getDocs(userQuery)).docs[0]
+
+    if ( !userDoc ) throw new Error("User not found")
+
+    await deleteDoc(userDoc.ref)
 }
 
 export async function getUsers(): Promise<User[]> {
