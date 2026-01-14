@@ -27,14 +27,14 @@ export default function UserHome() {
   }
 
   const handleScanResult = (value: string) => {
+    // value example: 122 - Jhon Doe
     setScannerVisible(false)
 
     alert("QR code scanné: " + value)
 
     const userId = value.split(" - ")[0]
 
-    handleQRScan(userId)
-    // example: 122 - Arthur Pereira
+    handleQRScan(Number(userId))
   }
 
   useEffect(() => {

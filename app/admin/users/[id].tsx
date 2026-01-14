@@ -29,8 +29,9 @@ export default function UserDetailsPage() {
   const loadData = async () => {
     setLoading(true)
     try {
-      const userData = await getUserById(id)
-      const sessionData = await getUserSessions(id)
+      const userId = Number(id)
+      const userData = await getUserById(userId)
+      const sessionData = await getUserSessions(userId)
       setUser(userData)
       setSessions(sessionData)
     } catch (err) {

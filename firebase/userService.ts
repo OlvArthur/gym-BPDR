@@ -14,7 +14,7 @@ import { Session } from "./sessionService"
 
 export type UserSession = Pick<Session, 'id' | 'checkIn' | 'checkOut' | 'duration'>  
 export interface User {
-    id: string
+    id: number
     name: string
     role: string
 }
@@ -58,10 +58,10 @@ export async function getUsers(): Promise<User[]> {
     return users
 }
 
-export async function getUserById(userId: string): Promise<User | null> {
+export async function getUserById(userId: number): Promise<User | null> {
     const userQuery = query(
         collection(db, "users"),
-        where("fieldId", "==", Number(userId)),
+        where("fieldId", "==", userId),
         limit(1)
     )
     const userDoc = (await getDocs(userQuery)).docs[0]
@@ -76,7 +76,7 @@ export async function getUserById(userId: string): Promise<User | null> {
     }
 }
 
-export async function getUserSessions(userId: string): Promise<UserSession[]> {
+export async function getUserSessions(userId: number): Promise<UserSession[]> {
     
     // Index necessary firestore: userID (ascending) checkIn (descending) __name__(descending)
     const sessionsQuery = query(

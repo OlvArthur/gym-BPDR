@@ -4,6 +4,7 @@ import {
   collection,
   doc,
   getDocs,
+  limit,
   query,
   serverTimestamp,
   Timestamp,
@@ -16,7 +17,8 @@ const MAX_IDLE_HOURS = 6
 
 export interface Session {
   id: string
-  userId: string 
+  fieldId: number
+  userId: number 
   checkIn: Timestamp
   checkOut: Timestamp | null
   duration: number | null
@@ -29,21 +31,18 @@ export interface EnrichedSession extends Session {
   userName: string
 }
 
-export async function handleQRScan(userId: string) {
+export async function handleQRScan(userId: number) {
   const activeSession = await getActiveSession(userId)
 
-  if (activeSession) {
-    return await stopSession(activeSession)
-  }
+  if (activeSession) await stopSession(activeSession)
 
-  return await startSession(userId)
+  await startSession(userId)
 }
 
-export async function startSession(userId: string) {
+export async function startSession(userId: number) {
   const nextId = await getNextIncrementId("session")
 
-  // await setDoc(doc(db, "sessions", String(nextId)), {
-  return await addDoc(collection(db, "sessions"), {
+  const sessionData = {
     fieldId: nextId,
     userId,
     checkIn: serverTimestamp(),
@@ -53,7 +52,9 @@ export async function startSession(userId: string) {
     importedAt: null,
     isDeleted: false,
     modifiedAt: null,
-  })
+  }
+
+  await addDoc(collection(db, "sessions"), sessionData )
 }
 
 export async function stopSession(session: Session) {
@@ -64,16 +65,13 @@ export async function stopSession(session: Session) {
 
 
   const duration =
-    Math.round((now.getTime() - sessionStart.getTime()) / (60 * 1000)); // minutes
+    Math.round((now.getTime() - sessionStart.getTime()) / (60 * 1000)) // minutes
 
-  // If the session is longer than MAX_IDLE_HOURS, cap the duration to one hour and start a new session
+  // Scenario: Someone started a session and forgot to clock out and the next day (or after 6 hours) wants to start a new session  
+  // Solution: the old session is closed with a duration of 1 hour before a new session is started
 
   let finalDuration = duration
-  if (duration > MAX_IDLE_HOURS * 60) {
-    finalDuration = 60
-
-    await startSession(session.userId)
-  }
+  if (duration > MAX_IDLE_HOURS * 60) finalDuration = 60
 
   await updateDoc(ref, {
     checkOut: now,
@@ -82,11 +80,12 @@ export async function stopSession(session: Session) {
   })
 }
 
-export async function getActiveSession(userId: string): Promise<Session | null> {
+export async function getActiveSession(userId: number): Promise<Session | null> {
   const q = query(
     collection(db, "sessions"),
     where("userId", "==", userId),
-    where("checkOut", "==", null)
+    where("checkOut", "==", null),
+    limit(1)
   )
 
   const snap = await getDocs(q)
@@ -107,7 +106,7 @@ export async function getSessionsByDate(date: Date): Promise<EnrichedSession[]> 
     where("checkIn", "<", end)
   )
   
-  const snapSessions = await getDocs(sessionsQuery);
+  const snapSessions = await getDocs(sessionsQuery)
   
   const sessions: EnrichedSession[] = []
   const userIds = new Set<number>()
@@ -132,7 +131,7 @@ export async function getSessionsByDate(date: Date): Promise<EnrichedSession[]> 
   const userMap = new Map<number, string>()
 
   snapUsers.forEach((doc) => {
-    const user = doc.data();
+    const user = doc.data()
     userMap.set(doc.data().fieldId, user.name)
   })
 
