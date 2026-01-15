@@ -69,7 +69,7 @@ export default function UserRanking() {
     <View style={styles.container}>
       {/* Top Row */}
       <View style={styles.topRow}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.push("/user")}>
           <Text style={styles.backButtonText}>Retour</Text>
         </TouchableOpacity>
 

@@ -12,7 +12,7 @@ export default function ClassementPage() {
     <View style={styles.screen}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.headerLeft}>
+        <TouchableOpacity onPress={() => router.push("/admin")} style={styles.headerLeft}>
           <Ionicons name="arrow-back" size={26} color="#fff" />
         </TouchableOpacity>
 

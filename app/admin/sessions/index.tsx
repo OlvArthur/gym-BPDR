@@ -46,7 +46,7 @@ export default function AdminSessions() {
 
       {/* HEADER */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => router.push("/admin")}>
           <Ionicons name="arrow-back" size={26} color="white" />
         </TouchableOpacity>
 

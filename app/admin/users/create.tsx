@@ -39,7 +39,7 @@ export default function CreateUserScreen() {
 
       {/* HEADER */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.iconButton}>
+        <TouchableOpacity onPress={() => router.push("/admin/users")} style={styles.iconButton}>
           <Ionicons name="close" size={26} color="#fff" />
         </TouchableOpacity>
 

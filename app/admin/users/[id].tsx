@@ -75,7 +75,7 @@ export default function UserDetailsPage() {
     <View style={styles.screen}>
       {/* HEADER */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => router.push("/admin/users")}>
           <Ionicons name="arrow-back" size={26} color="#fff" />
         </TouchableOpacity>
 
