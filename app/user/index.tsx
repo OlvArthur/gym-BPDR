@@ -1,10 +1,11 @@
-import { setVisibilityAsync } from 'expo-navigation-bar'
 import { useRouter } from "expo-router"
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 import { Button, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 
 import QRScanner from "@/components/QRScanner"
-import { handleQRScan } from '@/firebase/sessionService'
+import { StatusModal, StatusModalProps } from "@/components/SessionStatusModal"
+import { handleUserSessionTrigger } from '@/firebase/sessionService'
+
 
 export default function UserHome() {
   const now = new Date()
@@ -21,26 +22,34 @@ export default function UserHome() {
   const router = useRouter()
 
   const [scannerVisible, setScannerVisible] = useState(false)
+  const [status, setStatus] = useState<StatusModalProps>({ visible: false })
 
   const handleScanPress = () => {
     setScannerVisible(true)
   }
 
-  const handleScanResult = (value: string) => {
-    // value example: 122 - Jhon Doe
+  const handleScanResult = async (value: string) => {
     setScannerVisible(false)
 
-    alert("QR code scanné: " + value)
+    // value example: 122 - Jhon Doe
+    try {
+      setStatus({ visible: true, loading: true, message: "Traitement du code QR..." })
+      const [userId, userName] = value.split(" - ")
+      
+      const resultMessage = await handleUserSessionTrigger(Number(userId))
+      const userMessage = resultMessage(userName)
+      console.log("Result Message Function:", userMessage)
 
-    const userId = value.split(" - ")[0]
+      setStatus({ visible: true, loading: false, message: userMessage })
 
-    handleQRScan(Number(userId))
+      setTimeout(() =>{
+        setStatus({ visible: false })
+      }, 4000)
+    } 
+    catch (error) {
+      setStatus({ visible: true, loading: false, message: "Erreur lors du traitement du code QR. Veuillez réessayer." })
+    }
   }
-
-  useEffect(() => {
-    setVisibilityAsync('hidden')
-  }, [])
-
 
   return (
     <View style={styles.container}>
@@ -84,6 +93,9 @@ export default function UserHome() {
           <Button title="Fermer" onPress={() => setScannerVisible(false)} />
         </View>
       </Modal>
+
+      <StatusModal loading={status.loading} visible={status.visible} message={status.message} />
+        
     </View>
   )
 }
@@ -169,5 +181,12 @@ const styles = StyleSheet.create({
     color: "#444",
     fontSize: 13,
     textAlign: "left",
+  },
+
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
 })

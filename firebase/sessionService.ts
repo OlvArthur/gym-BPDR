@@ -14,6 +14,7 @@ import {
 import { getNextIncrementId } from "./hooks/getNextIncrementId";
 
 const MAX_IDLE_HOURS = 6
+const MINUTE_MS = 60_000
 
 export interface Session {
   id: string
@@ -31,12 +32,38 @@ export interface EnrichedSession extends Session {
   userName: string
 }
 
-export async function handleQRScan(userId: number) {
+type ResultMessage = (userName: string) => string
+
+const minutesBetween = (later: number, earlier: number) => Math.floor((later - earlier) / MINUTE_MS)
+const firstName = (fullName: string) => fullName.split(" ")[0]
+
+export async function handleUserSessionTrigger(userId: number): Promise<ResultMessage> {
   const activeSession = await getActiveSession(userId)
 
-  if (activeSession) await stopSession(activeSession)
 
-  await startSession(userId)
+  if(!activeSession) {
+    await startSession(userId)
+    return (userName) => ` QR code scanné\n Bon entraînement, ${firstName(userName)}!`
+  }
+
+  // Scenario: Someone started a session and forgot to clock out and the next day (or after 6 hours) wants to start a new session  
+  // Solution: the old session is closed with a duration of 1 hour before a new session is started
+  const nowMs = Date.now() 
+  const sessionStartMs = activeSession.checkIn.toDate().getTime()
+  const activeSessionDuration = minutesBetween(nowMs, sessionStartMs)
+
+  const idleLimitMinutes = MAX_IDLE_HOURS * 60
+  const isIdleTooLong = activeSessionDuration > idleLimitMinutes
+
+  if(isIdleTooLong) {
+    await stopSession(activeSession, 60)
+    await startSession(userId)
+
+    return (userName) => ` QR code scanné\n Votre précédente session a été clôturée automatiquement\n après ${MAX_IDLE_HOURS} heures d'inactivité.\n Bon entraînement, ${firstName(userName)}!`
+  }
+
+  await stopSession(activeSession, activeSessionDuration)
+  return (userName) => ` QR code scanné\n À bientôt, ${firstName(userName)}!`
 }
 
 export async function startSession(userId: number) {
@@ -57,25 +84,14 @@ export async function startSession(userId: number) {
   await addDoc(collection(db, "sessions"), sessionData )
 }
 
-export async function stopSession(session: Session) {
+export async function stopSession(session: Session, sessionDuration: number) {
   const ref = doc(db, "sessions", session.id)
 
-  const sessionStart = session.checkIn.toDate()
   const now = new Date()
-
-
-  const duration =
-    Math.round((now.getTime() - sessionStart.getTime()) / (60 * 1000)) // minutes
-
-  // Scenario: Someone started a session and forgot to clock out and the next day (or after 6 hours) wants to start a new session  
-  // Solution: the old session is closed with a duration of 1 hour before a new session is started
-
-  let finalDuration = duration
-  if (duration > MAX_IDLE_HOURS * 60) finalDuration = 60
 
   await updateDoc(ref, {
     checkOut: now,
-    duration: finalDuration,
+    duration: sessionDuration,
     modifiedAt: serverTimestamp(),
   })
 }

@@ -1,5 +1,8 @@
+import { setVisibilityAsync } from 'expo-navigation-bar';
+
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { Stack } from "expo-router";
+import { useEffect } from 'react';
 import { ActivityIndicator, View } from "react-native";
 
 function RootLayout() {
@@ -21,7 +24,11 @@ function RootLayout() {
 }
 
 export default function Layout() {
-  return (
+  useEffect(() => {
+      setVisibilityAsync('hidden')
+    }, [])
+
+    return (
     <AuthProvider>
       <RootLayout />
     </AuthProvider>
