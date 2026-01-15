@@ -1,10 +1,11 @@
-import { useRouter } from "expo-router"
-import React, { useState } from "react"
-import { Button, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { setVisibilityAsync } from 'expo-navigation-bar';
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { Button, Image, Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-import QRScanner from "@/components/QRScanner"
-import { StatusModal, StatusModalProps } from "@/components/SessionStatusModal"
-import { handleUserSessionTrigger } from '@/firebase/sessionService'
+import QRScanner from "@/components/QRScanner";
+import { StatusModal, StatusModalProps } from "@/components/SessionStatusModal";
+import { handleUserSessionTrigger } from '@/firebase/sessionService';
 
 
 export default function UserHome() {
@@ -27,6 +28,10 @@ export default function UserHome() {
   const handleScanPress = () => {
     setScannerVisible(true)
   }
+
+  useEffect(() => {
+    if(Platform.OS === 'android') setVisibilityAsync('hidden')
+  }, [])
 
   const handleScanResult = async (value: string) => {
     setScannerVisible(false)
