@@ -43,12 +43,15 @@ export async function getYearlyRanking(year: number): Promise<RankingSession[]> 
 
 async function getSessionRankingByPeriod(start: Date, end: Date): Promise<RankingSession[]> {
 
+  // index on sessions (checkIn, checkout, duration, __name__)
   const sessionsQuery = query(
     collection(db, "sessions"),
     where("checkIn", ">=", start),
-    where("checkIn", "<", end)
+    where("checkIn", "<", end),
+    where("checkOut", "!=", null),
+    where("duration", "<", 60 * 6), // Exclude idle session from old app with more than 6 hours.
   )
-
+  
   const snapSessions = await getDocs(sessionsQuery)
 
   const totals = new Map<number, number>();
@@ -56,12 +59,6 @@ async function getSessionRankingByPeriod(start: Date, end: Date): Promise<Rankin
 
   snapSessions.forEach((doc) => {
     const session = doc.data();
-    if (
-      !session.duration ||
-      !session.checkOut ||
-      Number(session.duration) > 60 * 6 // Exclude idle session from old app with more than 6 hours. 
-    ) return
-
     const sessionUserId = Number(session.userId)
 
     if(session.userId) userIds.add(sessionUserId)
