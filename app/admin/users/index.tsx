@@ -1,4 +1,4 @@
-import { getUsers } from "@/firebase/userService"
+import { getUsers, User } from "@/firebase/userService"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
 import React, { useEffect, useState } from "react"
@@ -10,12 +10,6 @@ import {
   TouchableOpacity,
   View
 } from "react-native"
-
-interface User { 
-  id: string
-  name: string
-  role: string
-} 
 
 export default function UsersPage() {
   const router = useRouter()
@@ -29,13 +23,12 @@ export default function UsersPage() {
     setLoading(true)
     try  {
       const data = await getUsers()
-      setUsers(data.sort((a,b) => Number(a.id) - Number(b.id)))
+      setUsers(data.sort((a,b) => a.id - b.id))
     } catch (err) {
       console.error("Failed to fetch users:", err)
       setUsers([])
     } finally {
       setLoading(false)
-
     }
   }
   
@@ -48,7 +41,7 @@ export default function UsersPage() {
   let filtered = users.filter(
     (u) =>
       u.name.toLowerCase().includes(search.toLowerCase()) ||
-      u.id.includes(search)
+      u.id.toString().includes(search)
   )
 
 
@@ -131,7 +124,7 @@ export default function UsersPage() {
       <FlatList
         contentContainerStyle={styles.listContainer}
         data={sortingOrder ? filtered : filtered.reverse() }
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
         ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
         extraData={sortingOrder}
