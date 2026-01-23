@@ -1,10 +1,10 @@
-import { CameraView, useCameraPermissions } from "expo-camera";
-import React, { useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { CameraView, useCameraPermissions } from "expo-camera"
+import React, { useState } from "react"
+import { ActivityIndicator, Text, View } from "react-native"
 
 export default function QRScanner({ onScan }: { onScan: (value: string) => void }) {
-  const [permission, requestPermission] = useCameraPermissions();
-  const [scanned, setScanned] = useState(false);
+  const [permission, requestPermission] = useCameraPermissions()
+  const [scanned, setScanned] = useState(false)
 
   if(!permission) return  <ActivityIndicator />
 
@@ -23,8 +23,8 @@ export default function QRScanner({ onScan }: { onScan: (value: string) => void 
       facing="front"
       onBarcodeScanned={({ data }) => {
           if (!scanned) {
-            setScanned(true);
-            onScan(data);
+            setScanned(true)
+            onScan(data)
           }
         }
       }
@@ -32,5 +32,5 @@ export default function QRScanner({ onScan }: { onScan: (value: string) => void 
         barcodeTypes: ["qr"],
       }}
     />
-  );
+  )
 }

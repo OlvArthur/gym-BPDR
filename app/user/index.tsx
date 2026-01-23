@@ -43,7 +43,6 @@ export default function UserHome() {
       
       const resultMessage = await handleUserSessionTrigger(Number(userId))
       const userMessage = resultMessage(userName)
-      console.log("Result Message Function:", userMessage)
 
       setStatus({ visible: true, loading: false, message: userMessage })
 
@@ -94,8 +93,8 @@ export default function UserHome() {
 
       <Modal visible={scannerVisible} animationType="slide">
         <View style={{ flex: 1 }}>
-          <QRScanner onScan={handleScanResult} />
           <Button title="Fermer" onPress={() => setScannerVisible(false)} />
+          <QRScanner onScan={handleScanResult} />
         </View>
       </Modal>
 
