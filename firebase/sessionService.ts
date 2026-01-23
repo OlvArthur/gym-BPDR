@@ -46,8 +46,8 @@ export async function handleUserSessionTrigger(userId: number): Promise<ResultMe
     return (userName) => ` QR code scanné\n Bon entraînement, ${firstName(userName)}!`
   }
 
-  // Scenario: Someone started a session and forgot to clock out and the next day (or after 6 hours) wants to start a new session  
-  // Solution: the old session is closed with a duration of 1 hour before a new session is started
+  // Scenario: Someone started a session and forgot to clock out and the next day (in fact after 6 hours) wants to start a new session  
+  // Solution: the old session is closed with a duration of half an hour and a new session is started
   const nowMs = Date.now() 
   const sessionStartMs = activeSession.checkIn.toDate().getTime()
   const activeSessionDuration = minutesBetween(nowMs, sessionStartMs)
@@ -56,7 +56,7 @@ export async function handleUserSessionTrigger(userId: number): Promise<ResultMe
   const isIdleTooLong = activeSessionDuration > idleLimitMinutes
 
   if(isIdleTooLong) {
-    await stopSession(activeSession, 60)
+    await stopSession(activeSession, 30)
     await startSession(userId)
 
     return (userName) => ` QR code scanné\n Votre précédente session a été clôturée automatiquement\n après ${MAX_IDLE_HOURS} heures d'inactivité.\n Bon entraînement, ${firstName(userName)}!`
