@@ -67,7 +67,7 @@ export async function handleUserSessionTrigger(userId: number): Promise<ResultMe
 }
 
 export async function startSession(userId: number) {
-  const nextId = await getNextIncrementId("session")
+  const nextId = await getNextIncrementId("sessions")
 
   const sessionData = {
     fieldId: nextId,

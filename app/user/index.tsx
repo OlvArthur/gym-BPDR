@@ -42,16 +42,17 @@ export default function UserHome() {
       const [userId, userName] = value.split(" - ")
       
       const resultMessage = await handleUserSessionTrigger(Number(userId))
-      const userMessage = resultMessage(userName)
+      const userMessage = userName ? resultMessage(userName) : "Opération réussie!"
 
       setStatus({ visible: true, loading: false, message: userMessage })
-
-      setTimeout(() =>{
-        setStatus({ visible: false })
-      }, 4000)
     } 
     catch (error) {
       setStatus({ visible: true, loading: false, message: "Erreur lors du traitement du code QR. Veuillez réessayer." })
+    }
+    finally {
+      setTimeout(() =>{
+        setStatus({ visible: false })
+      }, 4000)
     }
   }
 
