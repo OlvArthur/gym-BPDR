@@ -32,18 +32,16 @@ export interface EnrichedSession extends Session {
   userName: string
 }
 
-type ResultMessage = (userName: string) => string
 
 const minutesBetween = (later: number, earlier: number) => Math.floor((later - earlier) / MINUTE_MS)
-const firstName = (fullName: string) => fullName.split(" ")[0]
 
-export async function handleUserSessionTrigger(userId: number): Promise<ResultMessage> {
+export async function handleUserSessionTrigger(userId: number): Promise<string> {
   const activeSession = await getActiveSession(userId)
 
 
   if(!activeSession) {
     await startSession(userId)
-    return (userName) => ` QR code scanné\n Bon entraînement, ${firstName(userName)}!`
+    return `QR code scanné\n Bon entraînement!`
   }
 
   // Scenario: Someone started a session and forgot to clock out and the next day (in fact after 6 hours) wants to start a new session  
@@ -59,11 +57,11 @@ export async function handleUserSessionTrigger(userId: number): Promise<ResultMe
     await stopSession(activeSession, 30)
     await startSession(userId)
 
-    return (userName) => ` QR code scanné\n Votre précédente session a été clôturée automatiquement\n après ${MAX_IDLE_HOURS} heures d'inactivité.\n Bon entraînement, ${firstName(userName)}!`
+    return `QR code scanné\n Votre précédente session a été clôturée automatiquement\n après ${MAX_IDLE_HOURS} heures d'inactivité.\n Bon entraînement!`
   }
 
   await stopSession(activeSession, activeSessionDuration)
-  return (userName) => ` QR code scanné\n À bientôt, ${firstName(userName)}!`
+  return `QR code scanné\n À bientôt!`
 }
 
 export async function startSession(userId: number) {

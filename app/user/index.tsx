@@ -42,7 +42,7 @@ export default function UserHome() {
       const [userId, userName] = value.split(" - ")
       
       const resultMessage = await handleUserSessionTrigger(Number(userId))
-      const userMessage = userName ? resultMessage(userName) : "Opération réussie!"
+      const userMessage = userName ? resultMessage + ", " + userName.split(" ")[0] : resultMessage
 
       setStatus({ visible: true, loading: false, message: userMessage })
     } 
