@@ -1,11 +1,12 @@
-import { setVisibilityAsync } from 'expo-navigation-bar';
-import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
-import { Button, Image, Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { setVisibilityAsync } from 'expo-navigation-bar'
+import { useRouter } from "expo-router"
+import React, { useEffect, useState } from "react"
+import { Button, Image, Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 
-import QRScanner from "@/components/QRScanner";
-import { StatusModal, StatusModalProps } from "@/components/SessionStatusModal";
-import { handleUserSessionTrigger } from '@/firebase/sessionService';
+import QRScanner from "@/components/QRScanner"
+import { StatusModal, StatusModalProps } from "@/components/SessionStatusModal"
+import { handleUserSessionTrigger } from '@/firebase/sessionService'
+import { getUserById } from '@/firebase/userService'
 
 
 export default function UserHome() {
@@ -39,10 +40,18 @@ export default function UserHome() {
     // value example: 122 - Jhon Doe
     try {
       setStatus({ visible: true, loading: true, message: "Traitement du code QR..." })
-      const [userId, userName] = value.split(" - ")
+      const [userId, _] = value.split(" - ")
+      const user = await getUserById(Number(userId))
+
+      if(!user) {
+        setStatus({ visible: true, loading: false, message: "Utilisateur non trouvé. Veuillez contacter l'administrateur." })
+        return
+      }
+
+      const userName = user.name
       
       const resultMessage = await handleUserSessionTrigger(Number(userId))
-      const userMessage = userName ? resultMessage + ", " + userName.split(" ")[0] : resultMessage
+      const userMessage = userName ? resultMessage(userName.split(" ")[0]) : "Operation réussie!"
 
       setStatus({ visible: true, loading: false, message: userMessage })
     } 
