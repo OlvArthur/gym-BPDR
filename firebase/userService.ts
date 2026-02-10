@@ -12,7 +12,7 @@ import {
 import { Session } from "./sessionService"
 
 
-export type UserSession = Pick<Session, 'id' | 'checkIn' | 'checkOut' | 'duration'>  
+export type UserSession = Pick<Session, 'id' | 'checkIn' | 'checkOut' | 'duration' | 'autoClosed'>  
 export interface User {
     id: number
     name: string
@@ -82,7 +82,8 @@ export async function getUserSessions(userId: number): Promise<UserSession[]> {
     const sessionsQuery = query(
         collection(db, "sessions"),
         where("userId", "==", userId),
-        orderBy('checkIn', 'desc')
+        orderBy('checkIn', 'desc'),
+        limit(100)
     ) 
 
     const snapSessions = await getDocs(sessionsQuery)
@@ -94,6 +95,7 @@ export async function getUserSessions(userId: number): Promise<UserSession[]> {
               checkIn: doc.data().checkIn,
               checkOut: doc.data().checkOut,
               duration: doc.data().duration,
+              autoClosed: doc.data().autoClosed || false,
             })
         }
 

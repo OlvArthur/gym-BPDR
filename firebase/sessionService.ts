@@ -26,6 +26,7 @@ export interface Session {
   createdAt: Timestamp
   isDeleted: boolean
   modifiedAt: Timestamp | null
+  autoClosed?: boolean
 }
 
 export interface EnrichedSession extends Session {
@@ -56,7 +57,7 @@ export async function handleUserSessionTrigger(userId: number): Promise<ResultMe
   const isIdleTooLong = activeSessionDuration > idleLimitMinutes
 
   if(isIdleTooLong) {
-    await stopSession(activeSession, 30)
+    await stopSession(activeSession, 30, true)
     await startSession(userId)
 
     return (userName) => `QR code scanné\n Votre précédente session a été clôturée automatiquement\n après ${MAX_IDLE_HOURS} heures d'inactivité.\n Bon entraînement, ${userName}!`
@@ -84,7 +85,7 @@ export async function startSession(userId: number) {
   await addDoc(collection(db, "sessions"), sessionData )
 }
 
-export async function stopSession(session: Session, sessionDuration: number) {
+export async function stopSession(session: Session, sessionDuration: number, autoClosed = false) {
   const ref = doc(db, "sessions", session.id)
 
   const now = new Date()
@@ -93,6 +94,7 @@ export async function stopSession(session: Session, sessionDuration: number) {
     checkOut: now,
     duration: sessionDuration,
     modifiedAt: serverTimestamp(),
+    autoClosed
   })
 }
 

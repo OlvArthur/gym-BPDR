@@ -96,6 +96,15 @@ export default function UserHome() {
         >
           <Text style={styles.smallButtonText}>Classement</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.smallButton}
+          onPress={() => router.push("/user/activity")}
+        >
+          <Text style={styles.smallButtonText}>
+            Mon activité
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {/* Footer with Version */}
@@ -181,6 +190,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     alignSelf: "flex-end",
     marginRight: 20,
+    marginBottom: 20,
   },
 
   smallButtonText: {
