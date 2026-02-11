@@ -77,7 +77,7 @@ export default function ActivityScreen() {
 
       setUser({ id: Number(userId), name: user.name })
     } catch (error) {
-      console.error("Error parsing QR code:", error)
+      setStatus({ visible: true, loading: false, message: "Erreur lors du traitement du code QR. Veuillez contacter l'administrateur." })
     } finally {
       setTimeout(() =>{
         setStatus({ visible: false })
@@ -150,7 +150,7 @@ export default function ActivityScreen() {
       {!user ? (
         <View style={{ justifyContent: "center", alignItems: "center" }}>
           <TouchableOpacity style={styles.button} onPress={() => setScannerVisible(true)}>
-            <Text style={styles.buttonText}>Veuillez Scanner votre QR code pour s'identifier</Text>
+            <Text style={styles.buttonText}>Veuillez scanner votre QR code pour vous identifier</Text>
           </TouchableOpacity>
         </View>
         ) : loading ? (

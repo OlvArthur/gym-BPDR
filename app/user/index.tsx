@@ -56,7 +56,7 @@ export default function UserHome() {
       setStatus({ visible: true, loading: false, message: userMessage })
     } 
     catch (error) {
-      setStatus({ visible: true, loading: false, message: "Erreur lors du traitement du code QR. Veuillez réessayer." })
+      setStatus({ visible: true, loading: false, message: "Erreur lors du traitement du code QR. Veuillez contacter l'administrateur." })
     }
     finally {
       setTimeout(() =>{
