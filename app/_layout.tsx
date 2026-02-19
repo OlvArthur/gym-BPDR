@@ -1,23 +1,31 @@
-import { AuthProvider, useAuth } from "@/contexts/AuthContext";
-import { Stack } from "expo-router";
-import { ActivityIndicator, View } from "react-native";
+import OfflineBanner from "@/components/OfflineBanner"
+import OfflineModal from "@/components/OfflineModal"
+import { AuthProvider, useAuth } from "@/contexts/AuthContext"
+import { Stack } from "expo-router"
+import { ActivityIndicator, View } from "react-native"
 
 function RootLayout() {
-  const { authReady } = useAuth();
+  const { authReady } = useAuth()
 
   if (!authReady) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" />
       </View>
-    );
+    )
   }
 
-  return <Stack
+  return (
+    <>
+      <OfflineBanner />
+      <OfflineModal />
+      <Stack
         screenOptions={{
           headerShown: false,
         }}
-      />
+        />
+    </>
+  )
 }
 
 export default function Layout() {
@@ -25,5 +33,5 @@ export default function Layout() {
     <AuthProvider>
       <RootLayout />
     </AuthProvider>
-  );
+  )
 }

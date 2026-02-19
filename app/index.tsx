@@ -3,7 +3,7 @@ import { Redirect } from "expo-router";
 import { Text, View } from "react-native";
 
 export default function Index() {
-  const { authReady } = useAuth();
+  const { authReady } = useAuth()
   
   if (!authReady) {
     return (
@@ -13,6 +13,6 @@ export default function Index() {
     );
   }
 
-  return <Redirect href="./user" />;
+  return <Redirect href="./user" />
 }
 
