@@ -1,12 +1,12 @@
-import { Entypo, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import React, { JSX } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Entypo, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
+import { router } from 'expo-router'
+import React, { JSX } from 'react'
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 interface ButtonProps {
-  icon: JSX.Element;
-  title: string;
-  onPress?: () => void;
+  icon: JSX.Element
+  title: string
+  onPress?: () => void
 }
 
 function AdminButton({ icon, title, onPress }: ButtonProps) {
@@ -15,7 +15,7 @@ function AdminButton({ icon, title, onPress }: ButtonProps) {
       <View style={styles.icon}>{icon}</View>
       <Text style={styles.buttonText}>{title}</Text>
     </TouchableOpacity>
-  );
+  )
 }
 
 export default function AdminHomeScreen() {
@@ -47,9 +47,9 @@ export default function AdminHomeScreen() {
         />
       </View>
 
-      <Text style={styles.version}>v: 2.3</Text>
+      <Text style={styles.version}>v: 1.0</Text>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -96,4 +96,4 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     color: '#999',
   },
-});
+})

@@ -2,6 +2,7 @@ import QRScanner from "@/components/QRScanner"
 import { StatusModal, StatusModalProps } from "@/components/SessionStatusModal"
 import { UserSession as Session, getUserById, getUserSessions } from '@/firebase/userService'
 import { Ionicons } from '@expo/vector-icons'
+import * as Sentry from '@sentry/react-native'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { useRouter } from "expo-router"
@@ -68,7 +69,8 @@ export default function ActivityScreen() {
       const user = await getUserById(Number(userId))
 
       if(!user) {
-        setStatus({ visible: true, loading: false, message: "Utilisateur non trouvé. Veuillez contacter l'administrateur." })
+        setStatus({ visible: true, loading: false, message: "Utilisateur non trouvé. L'administrateur a été notifié." })
+        Sentry.captureException(new Error(`User with ID ${userId} not found`))
         return
       }
 
@@ -77,7 +79,8 @@ export default function ActivityScreen() {
 
       setUser({ id: Number(userId), name: user.name })
     } catch (error) {
-      setStatus({ visible: true, loading: false, message: "Erreur lors du traitement du code QR. Veuillez contacter l'administrateur." })
+      setStatus({ visible: true, loading: false, message: "Erreur lors du traitement du code QR. L'administrateur a été notifié." })
+      Sentry.captureException(error instanceof Error ? error : new Error("Unknown error during QR processing"))
     } finally {
       setTimeout(() =>{
         setStatus({ visible: false })
@@ -93,6 +96,7 @@ export default function ActivityScreen() {
       calculateMonthlyStats(sessionData)
     } catch (err) {
       console.error("Failed:", err)
+      Sentry.captureException(err instanceof Error ? err : new Error("Unknown error fetching user sessions"))
     } finally {
       setLoading(false)
     }

@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons"
+import * as Sentry from '@sentry/react-native'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { useLocalSearchParams, useRouter } from "expo-router"
@@ -35,7 +36,7 @@ export default function UserDetailsPage() {
       setUser(userData)
       setSessions(sessionData)
     } catch (err) {
-      console.error("Failed:", err)
+      Sentry.captureException(err instanceof Error ? err : new Error("Unknown error loading user details"))
     } finally {
       setLoading(false)
     }

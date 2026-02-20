@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons"
+import * as Sentry from '@sentry/react-native'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { useRouter } from "expo-router"
@@ -30,7 +31,7 @@ export default function AdminSessions() {
 
       setSessions(sessions)
     } catch (err) {
-      console.error("Failed to load sessions:", err)
+      Sentry.captureException(err instanceof Error ? err : new Error("Unknown error fetching sessions"))
       setSessions([])
     } finally {
       setLoading(false)

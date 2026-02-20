@@ -1,6 +1,7 @@
-import { Picker } from "@react-native-picker/picker";
-import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { Picker } from "@react-native-picker/picker"
+import * as Sentry from '@sentry/react-native'
+import { useRouter } from "expo-router"
+import React, { useEffect, useState } from "react"
 import {
   Platform,
   ScrollView,
@@ -8,15 +9,15 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from "react-native";
+} from "react-native"
 
-import { getMonthlyRanking } from "../../firebase/rankingService";
+import { getMonthlyRanking } from "../../firebase/rankingService"
 
 export default function UserRanking() {
-  const router = useRouter();
+  const router = useRouter()
 
-  const currentMonth = new Date().getMonth(); // 0-11
-  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth() // 0-11
+  const currentYear = new Date().getFullYear()
 
   const months = new Map<number, string>([
     [0, "Janvier"],
@@ -31,15 +32,15 @@ export default function UserRanking() {
     [9, "Octobre"],
     [10, "Novembre"],
     [11, "Décembre"],
-  ]);
+  ])
 
-  const years = [2022, 2023, 2024, 2025, 2026, 2027];
+  const years = [2022, 2023, 2024, 2025, 2026, 2027]
 
-  const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
-  const [selectedYear, setSelectedYear] = useState<number>(currentYear);
+  const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth)
+  const [selectedYear, setSelectedYear] = useState<number>(currentYear)
 
-  const [ranking, setRanking] = useState<{ name: string; time: string }[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [ranking, setRanking] = useState<{ name: string; time: string }[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function loadRanking() {
@@ -55,15 +56,15 @@ export default function UserRanking() {
 
         setRanking(formattedRanking)
       } catch (err) {
-        console.error("Failed to load ranking:", err)
+        Sentry.captureException(err instanceof Error ? err : new Error("Unknown error loading ranking"))
         setRanking([])
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
     }
 
-    loadRanking();
-  }, [selectedMonth, selectedYear]);
+    loadRanking()
+  }, [selectedMonth, selectedYear])
 
   return (
     <View style={styles.container}>
@@ -126,12 +127,12 @@ export default function UserRanking() {
       </ScrollView>
 
       {/* Footer Version */}
-      <Text style={styles.version}>Version: 28</Text>
+      <Text style={styles.version}>Version: 1.0</Text>
     </View>
-  );
+  )
 }
 
-const PRIMARY = "#3B57A2";
+const PRIMARY = "#3B57A2"
 
 const styles = StyleSheet.create({
   container: {
@@ -238,4 +239,4 @@ const styles = StyleSheet.create({
     color: "#444",
     marginTop: 10,
   },
-});
+})

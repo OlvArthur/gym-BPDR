@@ -1,5 +1,6 @@
 import { getUsers, User } from "@/firebase/userService"
 import { Ionicons } from "@expo/vector-icons"
+import * as Sentry from '@sentry/react-native'
 import { useRouter } from "expo-router"
 import React, { useEffect, useState } from "react"
 import {
@@ -25,7 +26,7 @@ export default function UsersPage() {
       const data = await getUsers()
       setUsers(data.sort((a,b) => a.id - b.id))
     } catch (err) {
-      console.error("Failed to fetch users:", err)
+      Sentry.captureException(err instanceof Error ? err : new Error("Unknown error fetching users"))
       setUsers([])
     } finally {
       setLoading(false)

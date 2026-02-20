@@ -1,18 +1,19 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons"
+import * as Sentry from '@sentry/react-native'
+import { useRouter } from "expo-router"
+import React, { useEffect, useState } from "react"
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 
-import RankingDropdown from "@/components/RankingDropdown";
-import { getMonthlyRanking, RankingSession } from '@/firebase/rankingService';
+import RankingDropdown from "@/components/RankingDropdown"
+import { getMonthlyRanking, RankingSession } from '@/firebase/rankingService'
 
-const PRIMARY = "#3B57A2";
+const PRIMARY = "#3B57A2"
 
 export default function ClassementMonth() {
-  const router = useRouter();
+  const router = useRouter()
 
-  const currentMonth = new Date().getMonth(); // 0-11
-    const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth() // 0-11
+    const currentYear = new Date().getFullYear()
   
     const months = new Map<number, string>([
       [0, "Janvier"],
@@ -27,7 +28,7 @@ export default function ClassementMonth() {
       [9, "Octobre"],
       [10, "Novembre"],
       [11, "Décembre"],
-    ]);
+    ])
   
     const years = [2022, 2023, 2024, 2025, 2026, 2027]
   
@@ -42,7 +43,7 @@ export default function ClassementMonth() {
         const data = await getMonthlyRanking(selectedMonth, selectedYear)
         setRanking(data)
       } catch (err) {
-        console.error("Failed to load monthly ranking:", err);
+        Sentry.captureException(err instanceof Error ? err : new Error("Unknown error loading ranking"))
         setRanking([])
       } finally {
         setLoading(false)
@@ -100,7 +101,7 @@ export default function ClassementMonth() {
         ))}
       </ScrollView>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -178,4 +179,4 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#000",
   },
-});
+})

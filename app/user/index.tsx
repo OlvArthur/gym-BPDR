@@ -7,6 +7,7 @@ import QRScanner from "@/components/QRScanner"
 import { StatusModal, StatusModalProps } from "@/components/SessionStatusModal"
 import { handleUserSessionTrigger } from '@/firebase/sessionService'
 import { getUserById } from '@/firebase/userService'
+import * as Sentry from '@sentry/react-native'
 
 
 export default function UserHome() {
@@ -26,10 +27,6 @@ export default function UserHome() {
   const [scannerVisible, setScannerVisible] = useState(false)
   const [status, setStatus] = useState<StatusModalProps>({ visible: false })
 
-  const handleScanPress = () => {
-    setScannerVisible(true)
-  }
-
   useEffect(() => {
     if(Platform.OS === 'android') setVisibilityAsync('hidden')
   }, [])
@@ -44,7 +41,8 @@ export default function UserHome() {
       const user = await getUserById(Number(userId))
 
       if(!user) {
-        setStatus({ visible: true, loading: false, message: "Utilisateur non trouvé. Veuillez contacter l'administrateur." })
+        setStatus({ visible: true, loading: false, message: "Utilisateur non trouvé. L'admnistrateur a été notifié." })
+        Sentry.captureException(new Error(`User with ID ${userId} not found`))
         return
       }
 
@@ -56,7 +54,8 @@ export default function UserHome() {
       setStatus({ visible: true, loading: false, message: userMessage })
     } 
     catch (error) {
-      setStatus({ visible: true, loading: false, message: "Erreur lors du traitement du code QR. Veuillez contacter l'administrateur." })
+      setStatus({ visible: true, loading: false, message: "Erreur lors du traitement du code QR. L'admnistrateur a été notifié." })
+      Sentry.captureException(error instanceof Error ? error : new Error("Unknown error during QR processing"))
     }
     finally {
       setTimeout(() =>{
@@ -86,7 +85,7 @@ export default function UserHome() {
 
       {/* Center Buttons */}
       <View style={styles.buttonArea}>
-        <TouchableOpacity style={styles.bigButton} onPress={handleScanPress}>
+        <TouchableOpacity style={styles.bigButton} onPress={() => setScannerVisible(true)}>
           <Text style={styles.bigButtonText}>Scanner un code QR</Text>
         </TouchableOpacity>
 
@@ -108,7 +107,7 @@ export default function UserHome() {
       </View>
 
       {/* Footer with Version */}
-      <Text style={styles.version}>Version: 28</Text>
+      <Text style={styles.version}>Version: 1.0</Text>
 
       <Modal visible={scannerVisible} animationType="slide">
         <View style={{ flex: 1 }}>
